@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta http-equiv="X-UA-Compatible" main="chrome=1">
+    <!-- <link rel="stylesheet/less" type="text/css" href="css/home.less"> -->
+    <link  rel='stylesheet' type="text/css" href="css/bootstrap.min.css">
+    <link  rel='stylesheet' type="text/css" href="css/common.css">
+    <link  rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css" />
+    <style type="text/css">
+    .header-bar{
+      height:75px;
+      background-color: #fff;
+    }
+    .main{
+      margin-top: 25px;
+    }
+    .main .container{
+      background-color: #fff;
+    }
+    .main .content{
+      padding:5px 15px 20px 15px;
+    }
+    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
+      vertical-align: middle;
+    }
+    .table>thead>tr>td{
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .dropdown-menu{
+      min-width:0; 
+    }
+    ._menu{
+      display: inline-block;
+      vertical-align: middle;
+    }
+    ._menu:before{
+      content:'';
+      display: inline-block;
+      width: 0px;
+      height: 100%;
+      vertical-align: middle;
+    }
+    </style>
+    <title>上传GIS数据</title>
+  </head>
+  <body>
+  <div class="header-bar">
+    <div class="container">
+      <div class="row" style='text-align:right'>
+        <h2 class='pull-left'>GIS数据管理系统</h2>
+        <div class="_menu">
+          <div class="dropdown ">
+            <button class="btn  dropdown-toggle" id="dropdownMenu1" type="button" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-th"></span>
+            </button>
+            <ul class="dropdown-menu pull-right" role="menu">
+              <li role="presentation">
+                <a href="#" role="menuitem" tabindex="-1" class='change-view' data-view='gisdata'>
+                <i class="icon-cloud"></i>&nbsp;&nbsp;GIS数据
+                </a>
+              </li>
+              <li role="presentation">
+                <a href="#" role="menuitem" tabindex="-1" class='change-view' data-view='upload'>
+                <i class="icon-cloud-upload"></i>&nbsp;&nbsp;上传文件
+                </a>
+              </li>
+              <li role="presentation">
+                <a href="#" role="menuitem" tabindex="-1" class='change-view' data-view='personinfo'>
+                <i class=" icon-user"></i> &nbsp;&nbsp;个人信息
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="container">
+    <!-- GIS数据视图 -->
+      <div class="row" id="gisdata-panel">
+        <div class='content'>
+        </div>
+      </div>
+      <!-- 上传文件视图 -->
+      <div class="row" id='upload-panel' style='display:none'>
+        <div class="content">
+          <form action="interface/upload.php" method="post" enctype="multipart/form-data">
+            <div class="form-group col-sm-6">
+              <label>上传GeoJSON</label><br>
+              <button class="btn btn-primary openfile-btn" type='button'>
+                <span class="glyphicon glyphicon-folder-open"></span>
+                <span>&nbsp;&nbsp;.json文件</span>
+              </button>
+              <span class="filename"></span>
+              <input name='geo' type='file' style='display:none' class='openfile'/><br>
+            </div>
+            <div class="form-group col-sm-6">
+              <label>上传Shapefile</label><br>
+                <div>
+                  <button class="btn btn-primary openfile-btn" type='button'>
+                    <span class="glyphicon glyphicon-folder-open"></span>
+                    <span>&nbsp;&nbsp;.shp文件</span>
+                  </button>
+                  <span class="filename"></span>
+                  <input name='shp' type='file' style='display:none' class='openfile'/>
+                </div>
+                <br>
+                <div>
+                  <button class="btn btn-primary openfile-btn" type='button'>
+                    <span class="glyphicon glyphicon-folder-open"></span>
+                    <span>&nbsp;&nbsp;.dbf文件</span>
+                  </button>
+                  <span class="filename"></span>
+                  <input name='dbf' type='file' style='display:none' class='openfile'/>
+                </div>
+            </div>
+
+            <button class="btn btn-success btn-block" type="submit">
+              <span class="glyphicon glyphicon-open">
+              </span><span>&nbsp;&nbsp;上传</span>
+            </button>
+          </form>
+        </div>
+      </div>
+      <!-- 个人信息视图 -->
+      <div class="row" id='personinfo-panel' style='display:none'>
+        <div class="content">
+          个人信息
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+        <div class="modal-content">
+           <div class="modal-header">
+              <button type="button" class="close" 
+                 data-dismiss="modal" aria-hidden="true">
+                    &times;
+              </button>
+              <h4 class="modal-title" id="myModalLabel">
+                 删除提醒
+              </h4>
+           </div>
+           <div class="modal-body">
+              <span id='delete-info'>
+                确认删除此项数据？
+              </span>
+           </div>
+           <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id='delete-btn'
+                 >确定
+              </button>
+              <button type="button" class="btn btn-default" 
+                 data-dismiss="modal">取消
+              </button>
+           </div>
+        </div><!-- /.modal-content -->
+  </div><!-- /.modal -->
+
+  <!-- GIS数据模板 -->
+  <script type="text/template" id='gisdata-template'>
+    <table class="table table-bordered">
+      <caption>
+        <h3 class='text-center'>GIS数据</h3>
+      </caption>
+      <thead>
+        <tr>
+          <td>名称</td>
+          <td>类型</td>
+          <td>大小</td>
+          <td>上传时间</td>
+          <td>操作</td>
+        </tr>
+      </thead>
+      <tbody>
+        {{each(i, item) data}}
+          <tr data-gis=${item.gisdata_coll}>
+            <td>${item.gis_name}</td>
+            <td>${item.gis_type}</td>
+            <td>${(item.gis_size/1024).toFixed(2)}&nbsp;KB</td>
+            <td>${item.upload_time}</td>
+            <td>
+              <button class="btn btn-info detail-info" title='查看'>
+                <a href='show-gis.html?gis=${item.gisdata_coll}' style='display:block'>
+                  <i class='icon-zoom-in'></i>
+                </a>
+              </button>
+              <button class="btn btn-danger delete-confirm" title='删除'> <i class="icon-trash"></i> </button>
+            </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </script>
+  <script src='script/jquery-1.12.2.min.js'></script>
+  <script src='script/bootstrap.min.js'></script>
+  <script src='script/jquery.tmpl.js'></script>
+  <script src='script/global.js'></script>
+  <script type="text/javascript">
+
+  $(function(){
+    var App = new gisApp();
+    App.currentGis = '';
+    /*添加视图*/
+    App.view_panel = {
+      gisdata:'#gisdata-panel',
+      upload:'#upload-panel',
+      personinfo:'#personinfo-panel'
+    }
+
+    /*选择文件*/
+    App.bindEvent('.openfile-btn','click',function(){
+      $(this).nextAll('.openfile').click();
+    });
+    App.bindEvent('.openfile', 'change', function(){
+      var arr = $(this).val().split('\\');
+      $(this).prev('.filename').text(arr[arr.length-1]);
+    });
+
+    App.Ajax({
+      url:'interface/getGisdata.php',
+      data:{
+        user_id:1,
+        type:'all'
+      }
+    },function(data){
+      if(data != false){
+        $("#gisdata-panel .content").html($.tmpl($("#gisdata-template").template(), data));
+        /*查看详情*/
+        App.bindEvent('.detail-info', 'click', function(){
+          console.log($(this).parents('tr').attr('data-gis'));
+        });
+        /*删除数据确认框*/
+        App.bindEvent('.delete-confirm', 'click', function(){
+          $('#myModal').modal('show');
+          console.log($(this).parents('tr').attr('data-gis'));
+          App.currentGis = 'data_'+$(this).parents('tr').attr('data-gis');
+        });
+      }else{
+        console.log('error');
+      }
+    });
+    /*删除数据*/
+    App.bindEvent('#delete-btn','click', function(){
+          $('#delete-btn').hide();
+          $('#delete-info').text('删除中，请稍后...');
+          App.Ajax({
+            url:'interface/deleteGisData.php',
+            data:{
+              user_id:'1',
+              coll_name:App.currentGis
+            }
+          },function(data){
+            var lefttime = 3;
+            setInterval(function(){
+              $('#delete-info').text('删除成功，'+(lefttime--)+'秒后自动刷新');
+            },1000)
+            setTimeout(function(){
+              window.location.reload();
+            },4000);
+          });
+        });
+
+    /*切换视图*/
+    App.bindEvent('.change-view','click',function(){
+      for(index in App.view_panel){
+        $(App.view_panel[index]).css({'display':'none'});
+      }
+      var panel = $(this).attr('data-view');
+      $(App.view_panel[panel]).css({'display':'block'});
+    });
+  })
+  </script>
+  </body>
+</html>

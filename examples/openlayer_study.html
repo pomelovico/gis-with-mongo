@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset='utf-8' Content-Type = 'text/plain'>
+    <link rel="stylesheet" type="text/css" href="../css/ol.css">
+    <style type="text/css">
+    body{font-family: "微软雅黑"}
+    h2,h3,h4{margin:1rem 0;}
+    h2{color:#2C3E50;}
+    h3{color:#1B4066;}
+    h4{color:#3498DB;}
+    p{color:#555;font-size: 10px;margin:0;line-height: 24px;}
+    span{color:#D35400;}
+    #map{
+    	margin:0 auto;
+    	width:90%;
+    	height: 400px;
+    	border:1px solid #ccc;
+    	background-color: #eee;
+    	cursor: hand;
+    }
+    #container{
+    	width: 90%;
+    	margin:50px auto;
+    }
+    </style>
+    <title>学习OpenLayers3</title>
+    </head>
+    <body>
+        <h2 style='text-align:center'>OpenLayers3 Demo</h2>
+        <p id='mousePos'></p>
+        <div id="map"></div>
+
+        <div id='container'>
+        	<h3>Openlayers3 学习笔记</h3>
+        	<h4>ol.Map</h4>
+        	<p><span>ol.Map()</span>是openlayers里最核心的组件，他可以搭建起一个地图的框架，<span>ol.Map()</span>类接受一个参数对象.参数基本成员包括<span>target，layers，view</span>.
+        	</p>
+        	<p>
+        	其中<span>target</span>成员表示绘制地图所指向的dom元素，一般为dom的id，<span>layers</span>成员是一个数组，包含多个layer，由<span>ol.layer.XXXX</span>类创建，成员<span>view</span>由<span>ol.View</span>类创建，用于控制地图的显示。
+        	</p>
+        	<h4>ol.layer.XX</h4>
+        	<p>所有的<span>ol.layer.XX</span>类均继承自<span>ol.Layer</span>抽象类</p>
+        	<p><span>ol.layer.XX</span>类用于生成一个图层对象，在本次学习中，针对GeoJSON矢量数据的呈现，需要用到<span>ol.layer.Vector</span>类，<span>ol.layer.Vector</span>需要传递一个包含source成员的参数对象，成员source指定了地图数据的来源，这个source成员值由<span>ol.source.Vector</span>生成</p>
+        	<p>
+        		<span>ol.layer.Vector</span>类中可添加一个style成员，用于指定该图层样式，style成员值需指定为<span>ol.style.Style</span>类生成的对象；或者是一个函数，函数的第一个参数是该图层的feature（即<span>ol.Feature</span>），第二个参数是<span>View</span>中的分辨率（resolution），是一个数字。函数返回值必须是一个<span>ol.style.Style</span>对象。
+        	</p>
+        	<h4>ol.source.XXXX</h4>
+        	<p>
+        		<span>ol.source.XXXX</span>类为各种类型数据指定数据源，例如针对矢量数据格式geojson，有<span>ol.source.Vector</span>类，传递的参数有很多，其中成员url指定了远程数据地址，同时通过赋予成员format值来设定数据格式，例如针对geojson数据，format需要指定为<span>ol.format.GeoJSON</span>的对象，才能正确解析geojson数据。此外，也可通过设定成员features的值来添加本地矢量数据，features的值必须是一个数组。数组包含多个feature。feature可由<span>ol.Feature</span>生成。
+        	</p>
+        	<h4>ol.Feature</h4>
+        	<p><span>ol.Feature</span>是用于创建一个特征对象的类，可以直接传递一个geometry对象即<span>ol.geom.XXXX</span>或者一个普通对象做参数，但对象中必须包含一个geometry成员。</p>
+        	<p>可以通过<span>getGeometry()</span>方法获取该对象中的几何特征，或者使用<span>getProperties()</span>获取该对象中的所有属性，返回的是一个对象。亦可通过<span>setGeometry()</span>方法设定该特征对象的几何特征，只需传入成员名即可，还可以通过<span>setProperties()</span>设置特征对象的属性，这些属性可以通过<span>get()</span>指定成员来获取</p>
+        	<h4>ol.geom.XXXX</h4>
+        	<p>
+        		<span>ol.geom.XXXX</span>用于产生一个geometry对象，需根据XXXX的类型来传递不同的<span>coordinates</span>数组，例如<span>ol.geom.Point</span>需传递一个位置数组[12,45]，<span>ol.geom.Polygon</span>需传递一个多边形数组，类似[[[1,2],[3,4],[6,7]]],传递的数据来自于GeoJSON对象中的coordinates成员
+        	</p>
+        	<h4>ol.format.GeoJSON</h4>
+        	<p><span>ol.format.GeoJSON</span>是一个用于读取GeoJSON格式数据的类，调用其对象的<span>readFeature()</span>方法可以读取type为Feature的geojson数据（本地），调用<span>readFeatures()</span>方法可以读取type为FeatureCollection的geojson，调用<span>readGeometry()</span>方法可以读取几何对象（如，Point，Polygon，LineString等），这些方法均返回一个feature对象</p>
+        	<h4>ol.style.Style</h4>
+        	<p>
+        		<span>ol.style.Style</span>用于生成一个style对象，设定图层样式，其中参数成员有fill（由<span>ol.style.Fill</span>类生成一个对象），stroke（由<span>ol.style.Stroke</span>类生成一个对象），text（由<span>ol.style.Text</span>类生成一个对象）等。<span>ol.style.XXXX</span>类针对不同的样式包含不同的样式参数，如color，width，font，fill等。
+        	</p>
+        </div>
+        <script type="text/javascript" src='../script/ol-3.12.js'></script>
+        <script type="text/javascript" src='../script/jquery-1.12.2.min.js' ></script>
+        <script type="text/javascript">
+
+  	  	var style = new ol.style.Style({
+			fill: new ol.style.Fill({
+				color:"rgba(0,0,0,0.8)"
+			}),
+			stroke: new ol.style.Stroke({
+				color:"rgba(128,128,128,1)",
+				width:1
+			}),
+			text: new ol.style.Text({
+	          font: '10px 微软雅黑',
+	          fill: new ol.style.Fill({
+	            color: '#333'
+	          })
+	        })
+		});
+		/*几何对象*/
+		var geojsonPolygon = {
+			type:"Polygon",
+			coordinates:[[[100,23],[130,27],[135,45],[99,50],[100,23]]]
+		};
+		var geojsonLineString = {
+			type:"LineString",
+			coordinates:[[100,23],[130,27],[135,45]]
+		};
+		var geojsonMultiLineString = {
+			type:"MultiLineString",
+			coordinates:[
+			[[77,23],[120,27],[130,45],[95,50]],
+			[[88,20],[56,30],[77,40]]
+			]
+		};
+		/*特征对象*/
+		var geojsonObject2 = {
+			type:"Feature",
+			geometry:{
+				type:"LineString",
+				coordinates:[[100,23],[130,27],[135,45],[99,50]]
+			},
+			properties:{name:'a polygon'}
+		};
+		var features2 = (new ol.format.GeoJSON()).readFeatures(geojsonObject2);
+
+		/*
+		 解析单个几何对象，并封装为一个特征
+		 ol.Feature可以直接接受一个geometry对象(ol.geom.XXXX)或者一个普通对象做参数，但对象中必须包含一个geometry成员。
+		 ol.Feature返回一个特征对象。
+		*/
+
+		var feature = new ol.Feature({
+			LineString:new ol.geom.LineString(geojsonLineString.coordinates),
+			geometry:(new ol.format.GeoJSON()).readGeometry(geojsonMultiLineString),
+			name:geojsonMultiLineString.type
+		});
+		/*设置特征对象中的几何对象为LineString*/
+		// feature.setGeometryName('LineString');
+		feature.setProperties({name:'Multi LineString'});
+		var features = new Array();
+		features.push(feature);
+		// console.log(feature.getProperties());
+		//矢量源数据必须是一个特征数组（由其中成员features规定）。
+  		var vectorSource = new ol.source.Vector({
+	        features: features
+	      });
+
+	    var map = new ol.Map({
+	    	target:'map',
+	    	layers:[
+	    	    new ol.layer.Vector({
+	    	    	source:vectorSource,
+	    	    	style: function(feature, resolution) {
+			          style.getText().setText(resolution < 0.1 ? feature.get('name'): "");
+			          return style;
+			        }
+	    	    })
+	    	],
+	    	view:new ol.View({
+	    		projection:'EPSG:4326',
+	    		center:[100,40],
+	    		zoom:2,
+	    		maxResolution:0.3,
+	    		minResolution:0.00001
+	    	}),
+	    	controls:ol.control.defaults().extend([
+	    		new ol.control.ScaleLine(),
+	    		new ol.control.MousePosition({
+	    			target:"mousePos",
+	    		})
+    		]),
+    		logo:"http://tp2.sinaimg.cn/1786215421/180/40069698759/1"
+        });
+        </script>
+    </body>
+</html>
+

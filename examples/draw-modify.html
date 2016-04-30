@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Draw and Modify Features</title>
+    <link rel="stylesheet" type="text/css" href="../css/ol.css">
+    <script type="text/javascript" src='../script/ol-3.12.js'></script>
+    <script type="text/javascript" src='../script/jquery-1.12.2.min.js' ></script>
+    <style type="text/css">
+    .map{width: 90%;height: 600px;margin: 30px auto;border:1px solid #ddd;}
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <form class="form-inline">
+      <label>Geometry type &nbsp;</label>
+      <select id="type">
+        <option value="Point">Point</option>
+        <option value="LineString">LineString</option>
+        <option value="Polygon">Polygon</option>
+      </select>
+    </form>
+    <a id='export' download="map.png" >Download</a>
+    <p id='no-download' ></p>
+    <input type='button' value='getFeatures' onclick='getFeatures()' />
+    <input type='button' value='add layers' onclick='addLayer()' />
+    <script>
+      var style = new ol.style.Style({
+        fill: new ol.style.Fill({
+          color:"rgba(0,0,0,0.8)"
+        }),
+        stroke: new ol.style.Stroke({
+          color:"rgba(120,120,120,1)",
+          width:1
+        }),
+        text: new ol.style.Text({
+              font: '10px 微软雅黑',
+              fill: new ol.style.Fill({
+                color: '#ddd'
+              })
+            })
+      });
+
+      var vectorSource = new ol.source.Vector({
+          url: 'getGeoJSON.php?coll_name=geo_35',
+          format:new ol.format.GeoJSON({
+            defaultDataProjection :'EPSG:4326'
+          }),
+          useSpatialIndex:false
+        });
+      var tileLayer = new ol.layer.Tile({
+        source: new ol.source.OSM(),
+        visible:false,
+        preload:0
+      });
+      var view = new ol.View({
+            projection:'EPSG:4326',
+            center:[120,40],
+            zoom:3,
+            maxResolution:1,
+            minResolution:0.00008
+        });
+
+
+      var map = new ol.Map({
+        layers: [
+          tileLayer,
+          new ol.layer.Vector({
+            source:vectorSource,
+            style:function(feature, resolution) {
+                style.getText().setText(resolution < 0.1 ? feature.get('name') : "");
+                return style;
+              }
+          })
+        ],
+        target: 'map',
+        view: view,
+        controls: ol.control.defaults().extend([
+          new ol.control.FullScreen()
+        ])
+      });
+      var getFeatures;
+      setTimeout(function(){
+        /*Draw*/
+        var features = new ol.Collection();
+          var featureOverlay = new ol.layer.Vector({
+            source: new ol.source.Vector({features: features}),
+            style: new ol.style.Style({
+              fill: new ol.style.Fill({
+                color: 'rgba(255, 255, 255, 0.2)'
+              }),
+              stroke: new ol.style.Stroke({
+                color: '#aaa',
+                width: 2
+              }),
+              image: new ol.style.Circle({
+                radius: 7,
+                fill: new ol.style.Fill({
+                  color: '#ffcc33'
+                })
+              })
+            })
+          });
+
+          featureOverlay.setMap(map);
+          var draw; // global so we can remove it later
+          function addInteraction() {
+            draw = new ol.interaction.Draw({
+              features: features,
+              type: /** @type {ol.geom.GeometryType} */ "LineString"
+            });
+            map.addInteraction(draw);
+          }
+          // addInteraction();
+
+        
+        var select = new ol.interaction.Select({
+          wrapX: false
+        });
+
+        select.on('select',function(feature){
+          feature['selected'].map(function(item,index){
+            var style = new ol.style.Style({
+              fill:new ol.style.Fill({
+                color:"rgba(255,255,255,0.5)"
+              }),
+              stroke:new ol.style.Stroke({
+                color:"#0BA6FF",
+                width:2
+              }),
+              text: new ol.style.Text({
+                color:'#333'
+              })
+            });
+            var s = {};
+            s = style;
+            // s.getText().setText(view.getResolution() < 0.1 ? item.get('name') : "");
+            item.setStyle(s);
+            // console.log(item);
+          });
+          feature['deselected'].map(function(item,index){
+            item.setStyle(style);
+          });
+        });
+        map.addInteraction(select);
+        /*Modify*/
+        var features = new ol.Collection(vectorSource.getFeatures());
+        var modify = new ol.interaction.Modify({
+          // features: features,
+          features: select.getFeatures(),
+          deleteCondition: function(event) {
+            return ol.events.condition.shiftKeyOnly(event) &&
+                ol.events.condition.singleClick(event);
+          }
+        });
+        map.addInteraction(modify);
+
+        getFeatures = function(){
+          // console.log(vectorSource.getClosestFeatureToCoordinate([100,30]));
+          // vectorSource.getFeaturesCollection().forEach(function(e,i,arr){
+          //   console.log(e.getRevision());
+          // });
+          var f = new ol.format.GeoJSON();
+          // var feature = vectorSource.getFeaturesCollection().item(0);
+          var feature = select.getFeatures();
+          // var data = JSON.parse(f.writeFeature(feature.item(0)));
+          var data = f.writeFeature(feature.item(0));
+          $.ajax({
+            url:'editGeoJSON.php',
+            type:'post',
+            dataType:'text',
+            data:{
+              data:data,
+              coll_name:'geo_35'
+            },
+            success:function(data){
+              console.log('success:');
+              console.log(data);
+            },
+            error:function(err){
+              console.log('fail:');
+              console.log(err);
+            }
+          });
+        }
+
+      },3000);
+
+      /*Download map*/
+      var exportPNGElement = document.getElementById('export');
+      if ('download' in exportPNGElement) {
+        exportPNGElement.addEventListener('click', function(e) {
+          map.once('postcompose', function(event) {
+            var canvas = event.context.canvas;
+            exportPNGElement.href = canvas.toDataURL('image/png');
+          });
+          map.renderSync();
+        }, false);
+      } else {
+        var info = document.getElementById('no-download');
+        info.style.display = '';
+      }
+
+      function addLayer(){
+        tileLayer.setVisible(true);
+      }
+    </script>
+  </body>
+</html>

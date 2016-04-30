@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Drag-and-Drop Image Vector</title>
+    <link rel="stylesheet" type="text/css" href="../css/ol.css">
+    <script type="text/javascript" src='../script/ol-3.12.js'></script>
+    <style type="text/css">
+    .map{width: 75%;height: 400px;margin: 30px auto;}
+    .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 200px;
+      }
+      .ol-popup:after, .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+      }
+      .ol-popup:after {
+        border-top-color: white;
+        border-width: 10px;
+        left: 48px;
+        margin-left: -10px;
+      }
+      .ol-popup:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        left: 48px;
+        margin-left: -11px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div id="info"></div>
+    <div id="popup" class="ol-popup">
+      <div id="popup-content"></div>
+    </div>
+    <script>
+      var defaultStyle = {
+        'Point': new ol.style.Style({
+          image: new ol.style.Circle({
+            fill: new ol.style.Fill({
+              color: 'rgba(255,255,0,0.5)'
+            }),
+            radius: 5,
+            stroke: new ol.style.Stroke({
+              color: '#ff0',
+              width: 1
+            })
+          })
+        }),
+        'LineString': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: '#f00',
+            width: 3
+          })
+        }),
+        'Polygon': new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(0,255,255,0.5)'
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#0ff',
+            width: 1
+          })
+        }),
+        'MultiPoint': new ol.style.Style({
+          image: new ol.style.Circle({
+            fill: new ol.style.Fill({
+              color: 'rgba(255,0,255,0.5)'
+            }),
+            radius: 5,
+            stroke: new ol.style.Stroke({
+              color: '#f0f',
+              width: 1
+            })
+          })
+        }),
+        'MultiLineString': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: '#0f0',
+            width: 3
+          })
+        }),
+        'MultiPolygon': new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(0,0,255,0.5)'
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#00f',
+            width: 1
+          })
+        })
+      };
+
+      var styleFunction = function(feature, resolution) {
+        var featureStyleFunction = feature.getStyleFunction();
+        if (featureStyleFunction) {
+          return featureStyleFunction.call(feature, resolution);
+        } else {
+          return defaultStyle[feature.getGeometry().getType()];
+        }
+      };
+
+      var dragAndDropInteraction = new ol.interaction.DragAndDrop({
+        formatConstructors: [
+          ol.format.GPX,
+          ol.format.GeoJSON,
+          ol.format.IGC,
+          ol.format.KML,
+          ol.format.TopoJSON
+        ]
+      });
+
+/********************************************/
+
+
+      var content = document.getElementById('popup-content');
+      var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
+        element: document.getElementById('popup'),
+        autoPan: true,
+        autoPanAnimation: {
+          duration: 250
+        }
+      }));
+
+      var map = new ol.Map({
+        interactions: ol.interaction.defaults().extend([
+          dragAndDropInteraction,
+          new ol.interaction.DragRotateAndZoom()
+          ]),
+        layers: [
+/*          new ol.layer.Tile({  //Tile预渲染层
+                  source: new ol.source.OSM()
+          }),*/
+          new ol.layer.Vector({
+            source:new ol.source.Vector({
+              url: 'getGeoJSON.php?gis=20160409238886',
+              format:new ol.format.GeoJSON({
+                defaultDataProjection :'EPSG:4326', 
+                geometryName:'chinaJSON'
+              })
+            })
+          })
+        ],
+        overlays: [overlay],
+        target: 'map',
+        view: new ol.View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+
+      dragAndDropInteraction.on('addfeatures', function(event) {
+        var vectorSource = new ol.source.Vector({
+          features: event.features
+        });
+        map.addLayer(new ol.layer.Image({
+          source: new ol.source.ImageVector({
+            source: vectorSource,
+            style: styleFunction
+          })
+        }));
+        map.getView().fit(
+            vectorSource.getExtent(), /** @type {ol.Size} */ (map.getSize()));
+      });
+
+      var displayFeatureInfo = function(pixel) {
+        var features = [];
+        map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+          features.push(feature);
+        });
+        if (features.length > 0) {
+          var info = [];
+          var i, ii;
+          for (i = 0, ii = features.length; i < ii; ++i) {
+            info.push(features[i].get('name'));
+            /*features[i].setStyle(new ol.style.Style({
+              fill: new ol.style.Fill({
+                color: 'rgba(128,255,0,0.5)'
+              })
+            }));*/
+          }
+          document.getElementById('info').innerHTML = info.join(', ') || '&nbsp';
+        } else {
+          document.getElementById('info').innerHTML = '&nbsp;';
+        }
+      };
+
+/*      map.on('pointermove', function(evt) {
+        if (evt.dragging) {
+          return;
+        }
+        var pixel = map.getEventPixel(evt.originalEvent);
+        displayFeatureInfo(pixel);
+      });*/
+      
+      map.on('pointermove', function(evt) {
+        var coordinate = evt.coordinate;
+        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+            coordinate, 'EPSG:3857', 'EPSG:4326'));
+        var features = [];
+        map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+          features.push(feature);
+        });
+        if(features.length){
+          content.innerHTML = '<p>' + features[0].get('name') +
+            '</p>';
+        overlay.setPosition(coordinate);
+        }else{
+          overlay.setPosition(undefined);
+        }
+        
+        // displayFeatureInfo(evt.pixel);
+      });
+    </script>
+  </body>
+</html>
