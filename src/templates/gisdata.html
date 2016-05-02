@@ -14,14 +14,14 @@
             </tr>
             </thead>
             <tbody>
-            <tr  ng-repeat="item in data">
-                <td data-gis=${item.gisdata_coll}>{{item.gis_name}}</td>
+            <tr  ng-repeat="item in gisdata">
+                <td data-gis={{item.id}}>{{item.gis_name}}</td>
                 <td>{{item.gis_type}}</td>
                 <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>
                 <td>{{item.upload_time}}</td>
                 <td>
                     <button class="btn btn-info detail-info" title='查看'>
-                        <a href='show-gis.html?gis={{item.gisdata_coll}}' style='display:block'>
+                        <a href='show-gis.html?gis={{item.id}}' target="blank" style='display:block'>
                             <i class='icon-zoom-in'></i>
                         </a>
                     </button>

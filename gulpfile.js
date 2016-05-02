@@ -5,6 +5,8 @@ var gulp = require('gulp');
 var babel = require('gulp-babel');
 var webpack = require('gulp-webpack');
 var livereload = require('gulp-livereload');
+var filter = require('gulp-filter');
+var useref = require('gulp-useref');
 
 gulp.task('webpack',function(){
     return gulp.src('./src/index.js')
@@ -20,4 +22,12 @@ gulp.task('webpack:watch',function(){
 gulp.task('live',function(){
     livereload.listen();
     gulp.watch(['./src/**/*.js','index2.html','./src/templates/*.html'],['webpack']);
+});
+gulp.task('public',function(){
+    var jsFilter = filter(['**/*.js','!**/.config.js'],{restore:true});
+    return gulp.src('./index2.html')
+        .pipe(useref())
+        .pipe(jsFilter)
+        .pipe(jsFilter.restore)
+        .pipe(gulp.dest('./build'))
 });

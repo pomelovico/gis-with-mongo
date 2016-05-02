@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "924048c2fd8709d9b9cd"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "804a72c7a5c4613656d8"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -599,7 +599,46 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var app = angular.module('App', [_angularRoute2.default]);
+	var app = angular.module('App', [_angularRoute2.default], ['$httpProvider', function ($httpProvider) {
+	    /*重写angularjs的post请求模块*/
+	    // Use x-www-form-urlencoded Content-Type
+	    $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
+	    var param = function param(obj) {
+	        var query = '',
+	            name,
+	            value,
+	            fullSubName,
+	            subName,
+	            subValue,
+	            innerObj,
+	            i;
+	        for (name in obj) {
+	            value = obj[name];
+	            if (value instanceof Array) {
+	                for (i = 0; i < value.length; ++i) {
+	                    subValue = value[i];
+	                    fullSubName = name + '[' + i + ']';
+	                    innerObj = {};
+	                    innerObj[fullSubName] = subValue;
+	                    query += param(innerObj) + '&';
+	                }
+	            } else if (value instanceof Object) {
+	                for (subName in value) {
+	                    subValue = value[subName];
+	                    fullSubName = name + '[' + subName + ']';
+	                    innerObj = {};
+	                    innerObj[fullSubName] = subValue;
+	                    query += param(innerObj) + '&';
+	                }
+	            } else if (value !== undefined && value !== null) query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
+	        }
+	        return query.length ? query.substr(0, query.length - 1) : query;
+	    };
+	    // Override $http service's default transformRequest
+	    $httpProvider.defaults.transformRequest = [function (data) {
+	        return angular.isObject(data) && String(data) !== '[object File]' ? param(data) : data;
+	    }];
+	}]);
 
 	/*路由*/
 	/**
@@ -622,7 +661,7 @@
 	    });
 	});
 	/*注入服务*/
-	// app.service('userInfo',services.userInfo);
+	app.service('gisData', _services.services.gisData);
 
 	/*指令*/
 	// app.directive('myFooter',directives.myFooter);
@@ -1711,16 +1750,20 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	/**
 	 * Created by LikoLu on 2016/4/21.
 	 */
 
-	function gisDataCtrl($scope) {
-	  $scope.message = 'Gisdata Page';
+	function gisDataCtrl($scope, gisData) {
+	    $scope.message = 'Gisdata Page';
+	    $scope.gisdata = gisData.getGisData();
+	    $scope.$on('gisdata.updated', function () {
+	        $scope.gisdata = gisData.getGisData();
+	    });
 	}
-	gisDataCtrl.$inject = ['$scope'];
+	gisDataCtrl.$inject = ['$scope', 'gisData'];
 	exports.default = gisDataCtrl;
 
 /***/ },
@@ -1770,57 +1813,52 @@
 	});
 	exports.services = undefined;
 
-	var _userInfo = __webpack_require__(8);
+	var _gisData = __webpack_require__(8);
 
-	var _userInfo2 = _interopRequireDefault(_userInfo);
-
-	var _photos = __webpack_require__(9);
-
-	var _photos2 = _interopRequireDefault(_photos);
+	var _gisData2 = _interopRequireDefault(_gisData);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	/**
-	 * Created by Vico on 2016.04.24.
-	 */
 	var services = exports.services = {
-	  userInfo: _userInfo2.default,
-	  photos: _photos2.default
-	};
+	  gisData: _gisData2.default
+	}; /**
+	    * Created by Vico on 2016.04.24.
+	    */
 
 /***/ },
 /* 8 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	/**
-	 * Created by Vico on 2016.04.24.
-	 */
 
-	function userInfo($http, $rootScope) {
-	    var User = {};
-	    $http.get('data/user.json').success(function (data) {
-	        User = data;
-	        $rootScope.$broadcast('users.updated');
+	var _server = __webpack_require__(9);
+
+	function gisData($http, $rootScope) {
+	    var GisData = {};
+	    $http.post(_server.API.getGisData, {
+	        user_id: 1,
+	        type: 'all'
+	    }).success(function (data) {
+	        GisData = data.gisdata;
+	        $rootScope.$broadcast('gisdata.updated');
 	    }).error(function (data) {
 	        console.log(data);
 	    });
 
-	    this.getUser = function () {
-	        return Object.assign({}, User);
+	    this.getGisData = function () {
+	        return Object.assign({}, GisData);
 	    };
-	    this.setUser = function (newUser) {
-	        User = newUser;
-	        $rootScope.$broadcast('users.updated');
-	    };
-	}
+	    this.deleteGisData = function (coll) {};
+	} /**
+	   * Created by Vico on 2016.05.02.
+	   */
 
-	userInfo.$inject = ['$http', '$rootScope'];
-	exports.default = userInfo;
+	gisData.$inject = ['$http', '$rootScope'];
+	exports.default = gisData;
 
 /***/ },
 /* 9 */
@@ -1829,29 +1867,17 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	    value: true
+	  value: true
 	});
 	/**
-	 * Created by LikoLu on 2016/4/25.
+	 * Created by Vico on 2016.05.02.
 	 */
-	function photos($http, $rootScope) {
-	    var _this = this;
+	var baseUrl = 'http://localhost/Projects/gis-with-mongo/interface/';
 
-	    this.Photos = {};
-
-	    $http.get('data/photos.json').success(function (data) {
-	        _this.Photos = data.ablums;
-	        $rootScope.$broadcast('ablums.updated');
-	    }).error(function (data) {
-	        console.log(data);
-	    });
-
-	    this.getPhotos = function () {
-	        return _this.Photos;
-	    };
-	}
-	photos.$inject = ['$http', '$rootScope'];
-	exports.default = photos;
+	var API = exports.API = {
+	  getGisData: baseUrl + 'getGisData.php',
+	  editGeoJSON: baseUrl + 'editGeoJSON.php'
+	};
 
 /***/ },
 /* 10 */
@@ -2019,7 +2045,7 @@
 /* 16 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in data\">\r\n                <td data-gis=${item.gisdata_coll}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='show-gis.html?gis={{item.gisdata_coll}}' style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <button class=\"btn btn-danger delete-confirm\" title='删除'> <i class=\"icon-trash\"></i> </button>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n";
+	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='show-gis.html?gis={{item.id}}' target=\"blank\" style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <button class=\"btn btn-danger delete-confirm\" title='删除'> <i class=\"icon-trash\"></i> </button>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n";
 
 /***/ },
 /* 17 */

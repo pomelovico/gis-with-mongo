@@ -1,11 +1,23 @@
 <?php
 header('Content-Type:text/html;charset=utf-8');
 
-$conn = new MongoClient();
-$db = $conn->selectDB('gis_manage_db');//选择一个数据库
+
+try{
+    $conn = new MongoClient();
+    $db = $conn->selectDB('gis_manage_db');//选择一个数据库
+}catch(MongoException $e){
+    echo json_encode(
+        array(
+            status=>1,
+            gisdata=>[]
+        )
+    );
+    exit();
+}
 
 $user_id = '';
 $type = '';
+
 if(isset($_POST['user_id'])){
 	$user_id = $_POST['user_id'];
 	$type = $_POST['type'];
@@ -16,7 +28,7 @@ if($type=='all'){
 	$records =$coll->find(array(user_id=>$user_id))->next()['gis_records'];
 	for($i=0; $i<count($records); $i+=1){
 		$gis_records[] = array(
-			gisdata_coll=>explode("_",$records[$i]['coll_name'])[1],
+			id=>explode("_",$records[$i]['coll_name'])[1],
 			gis_name=>$records[$i]['file_name'],
 			gis_type=>$records[$i]['type'],
 			gis_size=>$records[$i]['size'],
@@ -24,7 +36,8 @@ if($type=='all'){
 		);
 	}
 	$res = array(
-		data=>$gis_records
+		gisdata=>$gis_records,
+        status=>0
 	);
 	echo json_encode($res);
 }else{
