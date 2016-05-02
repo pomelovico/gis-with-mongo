@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta http-equiv="X-UA-Compatible" main="chrome=1">
+    <!-- <link rel="stylesheet/less" type="text/css" href="css/home.less"> -->
+    <link  rel='stylesheet' type="text/css" href="css/bootstrap.min.css">
+    <link  rel='stylesheet' type="text/css" href="css/common.css">
+    <link  rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css" />
+    <style type="text/css">
+    .header-bar{
+      height:75px;
+      background-color: #fff;
+    }
+    .main{
+      margin-top: 25px;
+    }
+    .main .container{
+      background-color: #fff;
+    }
+    .main .content{
+      padding:5px 15px 20px 15px;
+    }
+    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
+      vertical-align: middle;
+    }
+    .table>thead>tr>td{
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .dropdown-menu{
+      min-width:0; 
+    }
+    ._menu{
+      display: inline-block;
+      vertical-align: middle;
+    }
+    ._menu:before{
+      content:'';
+      display: inline-block;
+      width: 0px;
+      height: 100%;
+      vertical-align: middle;
+    }
+    </style>
+    <title>上传GIS数据</title>
+  </head>
+  <body ng-app="App">
+  <div class="header-bar">
+    <div class="container">
+      <div class="row" style='text-align:right'>
+        <h2 class='pull-left'>GIS数据管理系统</h2>
+        <div class="_menu">
+          <div class="dropdown ">
+            <button class="btn  dropdown-toggle" id="dropdownMenu1" type="button" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-th"></span>
+            </button>
+            <ul class="dropdown-menu pull-right" role="menu">
+              <li role="presentation">
+                <a href="#gisdata" role="menuitem" tabindex="-1" class='change-view' data-view='gisdata'>
+                <i class="icon-cloud"></i>&nbsp;&nbsp;GIS数据
+                </a>
+              </li>
+              <li role="presentation">
+                <a href="#upload" role="menuitem" tabindex="-1" class='change-view' data-view='upload'>
+                <i class="icon-cloud-upload"></i>&nbsp;&nbsp;上传文件
+                </a>
+              </li>
+              <li role="presentation">
+                <a href="#user" role="menuitem" tabindex="-1" class='change-view' data-view='personinfo'>
+                <i class=" icon-user"></i> &nbsp;&nbsp;个人信息
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="container">
+    <!-- GIS数据视图 -->
+      <div ng-view></div>
+    </div>
+  </div>
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+        <div class="modal-content">
+           <div class="modal-header">
+              <button type="button" class="close" 
+                 data-dismiss="modal" aria-hidden="true">
+                    &times;
+              </button>
+              <h4 class="modal-title" id="myModalLabel">
+                 删除提醒
+              </h4>
+           </div>
+           <div class="modal-body">
+              <span id='delete-info'>
+                确认删除此项数据？
+              </span>
+           </div>
+           <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id='delete-btn'
+                 >确定
+              </button>
+              <button type="button" class="btn btn-default" 
+                 data-dismiss="modal">取消
+              </button>
+           </div>
+        </div><!-- /.modal-content -->
+  </div><!-- /.modal -->
+
+
+  <script src='script/jquery-1.12.2.min.js'></script>
+  <script src='script/bootstrap.min.js'></script>
+  <script src='script/angular.min.js'></script>
+  <script src='script/bundle.js'></script>
+  </body>
+</html>

@@ -38,7 +38,7 @@ $errorType = array(
         .wrapper{
             margin:0 auto;
             width: 80%;
-            min-height: 400px;
+            min-height: 280px;
             padding: 20px;
             margin-top:20px;
             box-sizing:border-box;
