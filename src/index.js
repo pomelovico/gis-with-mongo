@@ -71,7 +71,7 @@ app.service('gisData',services.gisData);
 
 
 /*指令*/
-// app.directive('myFooter',directives.myFooter);
+app.directive('myConfirmDel',directives.myConfirmDel);
 
 
 /*控制器*/

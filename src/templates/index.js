@@ -4,5 +4,6 @@
 export const tmpls = {
     gisdata:require('./gisdata.html'),
     user:require('./user.html'),
-    upload:require('./upload.html')
+    upload:require('./upload.html'),
+    confirmDelete:require('./confirmDelete.html')
 };
