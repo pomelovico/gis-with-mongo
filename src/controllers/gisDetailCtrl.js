@@ -21,6 +21,8 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         isShowRecord:false, /*显示gis记录信息*/
         isAddingProp:false, /*正在添加属性*/
         isOpenTile:true, /*是否开启Tile层*/
+        hasModified:false, /*是否有修改*/
+        hasSelected:false, /*是否有选中的特征*/
         isOverMap:false
     };
     gisData.fecthGis($routeParams.id);
@@ -37,21 +39,13 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
             $scope.featureProps = data;
         });
     });
-    $scope.$on('mouserOverMap.updated',(e,data)=>{
-        $scope.$apply(()=>{
-            $scope.Flag.isOverMap = data;
-        });
-    });
-    $scope.$on('hasSelected.updated',(e,data)=>{
-        $scope.$apply(()=>{
-            $scope.Flag.hasSelected = data;
-        });
-    });
-    $scope.$on('hasModified.updated',(e,data)=>{
-        $scope.$apply(()=>{
-            $scope.Flag.hasModified = data;
-        });
-    });
+    $scope.$on('mouserOverMap.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isOverMap = data;});});
+    $scope.$on('hasSelected.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.hasSelected = data;});});
+    $scope.$on('hasModified.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.hasModified = data;});});
+    $scope.$on('isEditingVector.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isEditingVector = data;});});
+    $scope.$on('isEditingProp.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isEditingProp = data;});});
+    $scope.$on('isShowRecord.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isShowRecord = data;});});
+    $scope.$on('isAddingProp.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isAddingProp = data;});});
 
     /*编辑GIS数据——图形*/
     $scope.editGis = function(){
