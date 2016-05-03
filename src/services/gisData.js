@@ -54,7 +54,7 @@ function gisData($http, $rootScope,$location){
             })
             .success((data)=>{
                 DetailGisData = data;
-                $rootScope.$broadcast('gisDetailData.updated');
+                $rootScope.$broadcast('gisDetailData.updated',DetailGisData);
             })
             .error((data)=>{console.log(data)});
     };

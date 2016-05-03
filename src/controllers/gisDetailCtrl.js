@@ -21,27 +21,35 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         isShowRecord:false, /*显示gis记录信息*/
         isAddingProp:false, /*正在添加属性*/
         isOpenTile:true, /*是否开启Tile层*/
-        isInMap:false
+        isOverMap:false
     };
     gisData.fecthGis($routeParams.id);
     /*监听来自service的广播事件*/
-    $scope.$on('gisDetailData.updated',()=>{
-        let data = gisData.getDetailGis();
+    $scope.$on('gisDetailData.updated',(e,data)=>{
         if(data.status == 0){
             GISDATA = data.content;
             $scope.record = GISDATA.record;
             mapService.drawMap(GISDATA.gis);
         }
     });
-    $scope.$on('gisPopOverlayer.updated',()=>{
+    $scope.$on('featureProps.updated',(e,data)=>{
         $scope.$apply(()=>{
-            $scope.featureProps = mapService.getFeatureProps();
-            $scope.Flag.isInMap = true;
+            $scope.featureProps = data;
         });
     });
-    $scope.$on('outOfMap',()=>{
+    $scope.$on('mouserOverMap.updated',(e,data)=>{
         $scope.$apply(()=>{
-            $scope.Flag.isInMap = false;
+            $scope.Flag.isOverMap = data;
+        });
+    });
+    $scope.$on('hasSelected.updated',(e,data)=>{
+        $scope.$apply(()=>{
+            $scope.Flag.hasSelected = data;
+        });
+    });
+    $scope.$on('hasModified.updated',(e,data)=>{
+        $scope.$apply(()=>{
+            $scope.Flag.hasModified = data;
         });
     });
 
@@ -49,66 +57,13 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
     $scope.editGis = function(){
         /*移除鼠标移动事件监听*/
         mapService.removeListenMouse();
+        mapService.addSelectAndModifyEvent();
         $scope.featureProps = {};
 
         $scope.Flag.isEditingVector = true;
-        var select = new ol.interaction.Select({
-          wrapX: false
-        });
-        select.on('select',function(feature){
-          var style = new ol.style.Style({
-              fill:new ol.style.Fill({
-                color:"rgba(255,255,255,0.5)"
-              }),
-              stroke:new ol.style.Stroke({
-                color:"#0BA6FF",
-                width:1
-              }),
-              text: new ol.style.Text({
-                color:'#333'
-              })
-            });
+        $scope.Flag.isOverMap = false;
 
-          /*是否有选中的特征*/
-          
-          // console.log($scope.Flag.hasSelected);
-          $scope.$apply(function(){
-            if(feature['selected'].length<1)
-            $scope.Flag.hasSelected = false;
-          else
-            $scope.Flag.hasSelected = true;
-          });
-           /*注册选择事件*/
-          feature['selected'].map(function(item,index){
-            var s = style;
-            s.getText().setText(MAP.view.getResolution() < 0.1 ? item.get('name') : "");
-            item.setStyle(s);
-            var t = item.getProperties();
-            delete t.geometry;
-            $scope.featureProps = t;
-            $scope.$apply();
-            // setDefaultState();
-          });
-          feature['deselected'].map(function(item,index){
-            item.setStyle();
-            setDefaultState();
-          });
-        });
-        MAP.interaction.select = select;
-        MAP.map.addInteraction(select);
-        var modify = new ol.interaction.Modify({
-          features: select.getFeatures(),
-          deleteCondition: function(event) {
-            return ol.events.condition.shiftKeyOnly(event) &&
-                ol.events.condition.singleClick(event);
-          }
-        });
-        modify.on('modifystart',function(e){
-          //已经被修改
-          $scope.Flag.hasModified = true;
-        });
-        MAP.interaction.modify = modify;
-        MAP.map.addInteraction(modify);
+
       };
 }
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
