@@ -3,21 +3,9 @@
  */
 
 function mapService(){
-    /*数据源特征*/
-    var features = (new ol.format.GeoJSON()).readFeatures(mapdata);
-    /*矢量源*/
-    var vectorSource = new ol.source.Vector({
-        features: features
-    });
-    /*创建矢量数据层*/
-    var vectorLayer = new ol.layer.Vector({
-        source:vectorSource,
-        style:function(feature, resolution) {
-            var s = commonStyle;
-            s.getText().setText(resolution < 0.1 ? feature.get('name') : "");
-            return s;
-        }
-    });
+    var features,
+        vectorSource,
+        vectorLayer;
     /*Tile预渲染层*/
     var tileLayer = new ol.layer.Tile({
         source: new ol.source.OSM(),
@@ -60,6 +48,21 @@ function mapService(){
     var map = {};
     /*绘制*/
     this.drawMap = (mapdata)=>{
+        /*数据源特征*/
+        features = (new ol.format.GeoJSON()).readFeatures(mapdata);
+        /*矢量源*/
+        vectorSource = new ol.source.Vector({
+            features: features
+        });
+        /*创建矢量数据层*/
+        vectorLayer = new ol.layer.Vector({
+            source:vectorSource,
+            style:function(feature, resolution) {
+                var s = commonStyle;
+                s.getText().setText(resolution < 0.1 ? feature.get('name') : "");
+                return s;
+            }
+        });
         map = new ol.Map({
             layers: [
                 // tileLayer,
