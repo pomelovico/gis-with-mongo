@@ -213,9 +213,9 @@ app.controller('gisCtrl',function($scope,$http){
       gis:App.getUrlParam('gis')
     }
   ).success(function(data){
-    GISDATA= angular.copy(data.gis);
-    $scope.record = data.record;
-    MAP = drawMap(data.gis);
+    GISDATA= angular.copy(data.content.gis);
+    $scope.record = data.content.record;
+    MAP = drawMap(data.content.gis);
   }).error(function(data){
     alert('数据获取失败');
   });

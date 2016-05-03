@@ -2,25 +2,18 @@
  * Created by LikoLu on 2016/5/3.
  */
 
-function mapService(){
+function mapService($rootScope){
     var features,
         vectorSource,
-        vectorLayer;
+        vectorLayer,
+        map;
     /*Tile预渲染层*/
     var tileLayer = new ol.layer.Tile({
         source: new ol.source.OSM(),
         visible:true,
         preload:0
     });
-    /*popover popOverlayer*/
-    var popOverlayer = new ol.Overlay(({
-        id: 1,
-        element: document.getElementById('popup'),
-        autoPan: true,
-        autoPanAnimation: {
-            duration: 250
-        }
-    }));
+
     /*style*/
     var commonStyle = new ol.style.Style({
         fill: new ol.style.Fill({
@@ -45,11 +38,34 @@ function mapService(){
         maxResolution:1,
         minResolution:0.00008
     });
-    var map = {};
+    /*鼠标指针事件监听器--popOverlayer*/
+    var oldID = -1;
+    var featureProps = {};
+    var pointermoveListener = function(evt){
+        var coordinate = evt.coordinate;
+        var features = [];
+        map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+            features.push(feature);
+        });
+        if(features.length){
+            if(oldID != features[0].getId()){
+                var t = features[0].getProperties();
+                delete t.geometry;
+                featureProps = t;
+                $rootScope.$broadcast('gisPopOverlayer.updated');
+                oldID = features[0].getId();
+            }
+        }else{
+            $rootScope.$broadcast('outOfMap');
+        }
+    };
     /*绘制*/
     this.drawMap = (mapdata)=>{
         /*数据源特征*/
         features = (new ol.format.GeoJSON()).readFeatures(mapdata);
+        features.map(function(item,index){
+            item.setId(mapdata.features[index]._id);
+        });
         /*矢量源*/
         vectorSource = new ol.source.Vector({
             features: features
@@ -68,9 +84,6 @@ function mapService(){
                 // tileLayer,
                 vectorLayer
             ],
-            overlays:[
-                popOverlayer
-            ],
             target: 'map',
             view: defaultView
         });
@@ -80,6 +93,13 @@ function mapService(){
             interaction:{}
         }
     }
+    this.getFeatureProps = ()=>{
+        return featureProps;
+    };
+    this.removeListenMouse = ()=>{
+        oldID = -1;
+        map.un('pointermove',pointermoveListener);
+    }
 }
-
+mapService.$inject = ['$rootScope'];
 export default mapService;

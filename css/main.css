@@ -97,11 +97,10 @@
         -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4));
         filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4));
         padding-bottom:10px;
-        border-radius: 8px;
-        /*border: 1px solid #cccccc;*/
-        bottom: 12px;
-        left: -50px;
+        top: 0;
+        right: 0;
         min-width: 200px;
+        z-index: 200;
       }
       .ol-popup:after, .ol-popup:before {
         top: 100%;
@@ -112,18 +111,6 @@
         position: absolute;
         pointer-events: none;
       }
-      .ol-popup:after {
-        border-top-color: white;
-        border-width: 10px;
-        left: 48px;
-        margin-left: -10px;
-      }
-      .ol-popup:before {
-        border-top-color: #cccccc;
-        border-width: 11px;
-        left: 48px;
-        margin-left: -11px;
-      }
       .popup-content{
         padding: 0 10px;
         margin:0 auto;
@@ -133,7 +120,5 @@
         background-color: #01A1E3;
         color:#fff;
         padding: 4px 0;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
       }
       

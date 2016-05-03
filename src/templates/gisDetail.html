@@ -1,7 +1,25 @@
 <div class="row">
     <div class="map-area col-sm-7">
-        <div id="map"></div>
+        <div id="map">
+            <div class="ol-popup" ng-show="Flag.isInMap">
+                <p id='title' class='tc'>特征属性</p>
+                <div class="popup-content">
+                    <table class='f12'>
+                        <tr ng-repeat="(x,y) in featureProps">
+                            <th class='tr'>
+                                <span ng-bind='x'></span>：
+                            </th>
+                            <td>
+                                <span >{{y}}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
+    <!-- popupOverlayer -->
+
     <div class="col-sm-5" id="sider-bar" >
         <div class="row" >
             <div class="col-sm-9" style="height:520px;overflow: hidden;overflow-y: auto" >
@@ -116,21 +134,4 @@
     <!-- 模态框 -->
     <div ng-include="'tmpl/removePropModal.html'" ></div>
     <div ng-include="'tmpl/deleteGisModal.html'" ></div>
-
-    <!-- popupOverlayer -->
-    <div id="popup" class="ol-popup">
-        <p id='title' class='tc'>特征属性</p>
-        <div class="popup-content">
-            <table class='f12'>
-                <tr ng-repeat="(x,y) in featureProps">
-                    <th class='tr'>
-                        <span ng-bind='x'></span>：
-                    </th>
-                    <td>
-                        <span >{{y}}</span>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
 </div>
