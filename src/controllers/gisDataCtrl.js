@@ -3,7 +3,6 @@
  */
 
 function gisDataCtrl($scope,gisData,$timeout){
-    $scope.message = 'Gisdata Page';
     $scope.alertInfo = '';
     $scope.gisID = '123';
     $scope.gisdata = gisData.getGisData();

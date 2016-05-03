@@ -67,11 +67,12 @@ app.config(function($routeProvider){
         })
         .when('/gisDetail/:id',{
             template : tmpls.gisDetail,
-            controller : 'gisDetail'
+            controller : 'gisDetailCtrl'
         })
 });
 /*注入服务*/
 app.service('gisData',services.gisData);
+app.service('mapService',services.mapService);
 
 
 /*指令*/
@@ -83,5 +84,6 @@ app.directive('mySelectBtn',directives.mySelectBtn);
 app.controller('gisDataCtrl',controllers.gisDataCtrl);
 app.controller('userCtrl',controllers.userCtrl);
 app.controller('uploadCtrl',controllers.uploadCtrl);
+app.controller('gisDetailCtrl',controllers.gisDetailCtrl);
 
 

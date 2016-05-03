@@ -14,7 +14,8 @@ module.exports = {
         bundle:'./src/index.js'
     },
     externals:{
-        angular: true
+        angular: true,
+        ol: true
     },
     output: {
         // publicPath:'/public/',

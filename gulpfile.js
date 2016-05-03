@@ -25,7 +25,7 @@ gulp.task('live',function(){
 });
 gulp.task('public',function(){
     var jsFilter = filter(['**/*.js','!**/.config.js'],{restore:true});
-    return gulp.src('./index2.html')
+    return gulp.src('./index-backup.html')
         .pipe(useref())
         .pipe(jsFilter)
         .pipe(jsFilter.restore)

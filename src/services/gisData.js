@@ -5,7 +5,8 @@
 import {API} from '../constants/server';
 
 function gisData($http, $rootScope,$location){
-    var GisData = [];
+    let GisRecords = [];
+    let DetailGisData = {};
     $http.post(
         API.getGisData,
         {
@@ -13,15 +14,16 @@ function gisData($http, $rootScope,$location){
         type:'all'
         })
         .success((data)=>{
-            GisData = data.gisdata;
+            GisRecords = data.gisdata;
             $rootScope.$broadcast('gisdata.updated');
         })
         .error((data)=>{console.log(data)});
 
+    /*主页gis数据记录*/
     this.getGisData = ()=>{
-        return Object.assign({},GisData);
+        return Object.assign({},GisRecords);
     };
-    this.deleteGisData = (id)=>{
+    this.deleteGisData = id =>{
         $rootScope.$broadcast('gisdata.isdeleting');
         $http.post(
             API.deleteGisData,
@@ -32,16 +34,33 @@ function gisData($http, $rootScope,$location){
             .success((data)=>{
                 console.log('success');
                 let t = [];
-                for (let i in GisData){
-                    if(GisData[i].id != id){
-                        t.push(GisData[i]);
+                for (let i in GisRecords){
+                    if(GisRecords[i].id != id){
+                        t.push(GisRecords[i]);
                     }
                 }
-                GisData = t;
+                GisRecords = t;
                 $rootScope.$broadcast('gisdata.deleted');
             })
             .error((data)=>{console.log(data)});
     };
+    /*GIS详情数据*/
+    this.fecthGis = id =>{
+        $http.post(
+            API.getGisData,
+            {
+                gis:id,
+                type:'one'
+            })
+            .success((data)=>{
+                DetailGisData = data;
+                $rootScope.$broadcast('gisDetailData.updated');
+            })
+            .error((data)=>{console.log(data)});
+    };
+    this.getDetailGis = id=>{
+        return Object.assign({},DetailGisData);
+    }
 }
 gisData.$inject = ['$http','$rootScope','$location'];
 export default gisData;

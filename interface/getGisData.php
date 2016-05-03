@@ -66,6 +66,9 @@ if($type=='all'){
 			description=>$record['description'],
 			)
 	);
-	echo json_encode($data);
+	echo json_encode(array(
+		content=>$data,
+        status=>0
+	));
 }
 ?>
