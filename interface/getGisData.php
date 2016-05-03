@@ -25,7 +25,9 @@ if(isset($_POST['user_id'])){
 if($type=='all'){
 	$coll = $db->selectCollection('users_data_records');//选择数据库中的集合
 	$gis_records = array();
-	$records =$coll->find(array(user_id=>$user_id))->next()['gis_records'];
+
+	$records = $coll->find(array(user_id=>$user_id))->getNext()['gis_records'];
+//	echo $records;
 	for($i=0; $i<count($records); $i+=1){
 		$gis_records[] = array(
 			id=>explode("_",$records[$i]['coll_name'])[1],

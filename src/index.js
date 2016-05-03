@@ -65,6 +65,10 @@ app.config(function($routeProvider){
             template : tmpls.upload,
             controller : 'uploadCtrl'
         })
+        .when('/gisDetail/:id',{
+            template : tmpls.gisDetail,
+            controller : 'gisDetail'
+        })
 });
 /*注入服务*/
 app.service('gisData',services.gisData);

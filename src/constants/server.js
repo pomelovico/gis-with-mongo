@@ -5,5 +5,6 @@ const baseUrl = 'http://localhost/Projects/gis-with-mongo/interface/';
 
 export  const API = {
     getGisData:baseUrl+'getGisData.php',
-    editGeoJSON:baseUrl+'editGeoJSON.php'
+    editGeoJSON:baseUrl+'editGeoJSON.php',
+    deleteGisData:baseUrl+'deleteGisData.php'
 };

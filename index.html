@@ -180,15 +180,15 @@
         </tr>
       </thead>
       <tbody>
-        {{each(i, item) data}}
-          <tr data-gis=${item.gisdata_coll}>
+        {{each(i, item) gisdata}}
+          <tr data-gis=${item.id}>
             <td>${item.gis_name}</td>
             <td>${item.gis_type}</td>
             <td>${(item.gis_size/1024).toFixed(2)}&nbsp;KB</td>
             <td>${item.upload_time}</td>
             <td>
               <button class="btn btn-info detail-info" title='查看'>
-                <a href='show-gis.html?gis=${item.gisdata_coll}' style='display:block'>
+                <a href='show-gis.html?gis=${item.id}' style='display:block'>
                   <i class='icon-zoom-in'></i>
                 </a>
               </button>
@@ -227,11 +227,12 @@
     App.Ajax({
       url:'interface/getGisdata.php',
       data:{
-        user_id:1,
+        user_id:'1',
         type:'all'
       }
     },function(data){
       if(data != false){
+        console.log(data);
         $("#gisdata-panel .content").html($.tmpl($("#gisdata-template").template(), data));
         /*查看详情*/
         App.bindEvent('.detail-info', 'click', function(){

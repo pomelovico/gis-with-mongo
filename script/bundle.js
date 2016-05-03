@@ -50,7 +50,7 @@
 /******/ 			}
 /******/ 		};
 /******/ 	}
-
+/******/
 /******/ 	
 /******/ 	
 /******/ 	// Copied from https://github.com/facebook/react/blob/bef45b0/src/shared/utils/canDefineProperty.js
@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "804a72c7a5c4613656d8"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "ad8956de53cffcec1972"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -531,17 +531,17 @@
 /******/ 		hotSetStatus("idle");
 /******/ 		callback(null, outdatedModules);
 /******/ 	}
-
+/******/
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
@@ -551,30 +551,30 @@
 /******/ 			parents: hotCurrentParents,
 /******/ 			children: []
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, hotCreateRequire(moduleId));
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// __webpack_hash__
 /******/ 	__webpack_require__.h = function() { return hotCurrentHash; };
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return hotCreateRequire(0)(0);
 /******/ })
@@ -584,21 +584,21 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	var _angularRoute = __webpack_require__(1);
-
+	
 	var _angularRoute2 = _interopRequireDefault(_angularRoute);
-
+	
 	var _controllers = __webpack_require__(3);
-
+	
 	var _services = __webpack_require__(7);
-
+	
 	var _directives = __webpack_require__(10);
-
-	var _templates = __webpack_require__(15);
-
+	
+	var _templates = __webpack_require__(16);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+	
 	var app = angular.module('App', [_angularRoute2.default], ['$httpProvider', function ($httpProvider) {
 	    /*重写angularjs的post请求模块*/
 	    // Use x-www-form-urlencoded Content-Type
@@ -639,7 +639,7 @@
 	        return angular.isObject(data) && String(data) !== '[object File]' ? param(data) : data;
 	    }];
 	}]);
-
+	
 	/*路由*/
 	/**
 	 * Created by LikoLu on 2016/4/21.
@@ -658,14 +658,17 @@
 	    }).when('/upload', {
 	        template: _templates.tmpls.upload,
 	        controller: 'uploadCtrl'
+	    }).when('/gisDetail/:id', {
+	        template: _templates.tmpls.gisDetail,
+	        controller: 'gisDetail'
 	    });
 	});
 	/*注入服务*/
 	app.service('gisData', _services.services.gisData);
-
+	
 	/*指令*/
-	// app.directive('myFooter',directives.myFooter);
-
+	app.directive('myConfirmDel', _directives.directives.myConfirmDel);
+	
 	/*控制器*/
 	app.controller('gisDataCtrl', _controllers.controllers.gisDataCtrl);
 	app.controller('userCtrl', _controllers.controllers.userCtrl);
@@ -689,7 +692,7 @@
 	 * License: MIT
 	 */
 	(function(window, angular) {'use strict';
-
+	
 	/**
 	 * @ngdoc module
 	 * @name ngRoute
@@ -709,7 +712,7 @@
 	var ngRouteModule = angular.module('ngRoute', ['ng']).
 	                        provider('$route', $RouteProvider),
 	    $routeMinErr = angular.$$minErr('ngRoute');
-
+	
 	/**
 	 * @ngdoc provider
 	 * @name $routeProvider
@@ -728,9 +731,9 @@
 	  function inherit(parent, extra) {
 	    return angular.extend(Object.create(parent), extra);
 	  }
-
+	
 	  var routes = {};
-
+	
 	  /**
 	   * @ngdoc method
 	   * @name $routeProvider#when
@@ -855,22 +858,22 @@
 	      routeCopy,
 	      path && pathRegExp(path, routeCopy)
 	    );
-
+	
 	    // create redirection for trailing slashes
 	    if (path) {
 	      var redirectPath = (path[path.length - 1] == '/')
 	            ? path.substr(0, path.length - 1)
 	            : path + '/';
-
+	
 	      routes[redirectPath] = angular.extend(
 	        {redirectTo: path},
 	        pathRegExp(redirectPath, routeCopy)
 	      );
 	    }
-
+	
 	    return this;
 	  };
-
+	
 	  /**
 	   * @ngdoc property
 	   * @name $routeProvider#caseInsensitiveMatch
@@ -881,7 +884,7 @@
 	   * algorithm. Defaults to `false`.
 	   */
 	  this.caseInsensitiveMatch = false;
-
+	
 	   /**
 	    * @param path {string} path
 	    * @param opts {Object} options
@@ -900,7 +903,7 @@
 	          regexp: path
 	        },
 	        keys = ret.keys = [];
-
+	
 	    path = path
 	      .replace(/([().])/g, '\\$1')
 	      .replace(/(\/)?:(\w+)(\*\?|[\?\*])?/g, function(_, slash, key, option) {
@@ -918,11 +921,11 @@
 	          + (optional || '');
 	      })
 	      .replace(/([\/$\*])/g, '\\$1');
-
+	
 	    ret.regexp = new RegExp('^' + path + '$', insensitive ? 'i' : '');
 	    return ret;
 	  }
-
+	
 	  /**
 	   * @ngdoc method
 	   * @name $routeProvider#otherwise
@@ -942,8 +945,8 @@
 	    this.when(null, params);
 	    return this;
 	  };
-
-
+	
+	
 	  this.$get = ['$rootScope',
 	               '$location',
 	               '$routeParams',
@@ -952,7 +955,7 @@
 	               '$templateRequest',
 	               '$sce',
 	      function($rootScope, $location, $routeParams, $q, $injector, $templateRequest, $sce) {
-
+	
 	    /**
 	     * @ngdoc service
 	     * @name $route
@@ -1087,7 +1090,7 @@
 	     *   </file>
 	     * </example>
 	     */
-
+	
 	    /**
 	     * @ngdoc event
 	     * @name $route#$routeChangeStart
@@ -1107,7 +1110,7 @@
 	     * @param {Route} next Future route information.
 	     * @param {Route} current Current route information.
 	     */
-
+	
 	    /**
 	     * @ngdoc event
 	     * @name $route#$routeChangeSuccess
@@ -1124,7 +1127,7 @@
 	     * @param {Route|Undefined} previous Previous route information, or undefined if current is
 	     * first route entered.
 	     */
-
+	
 	    /**
 	     * @ngdoc event
 	     * @name $route#$routeChangeError
@@ -1137,7 +1140,7 @@
 	     * @param {Route} previous Previous route information.
 	     * @param {Route} rejection Rejection of the promise. Usually the error of the failed promise.
 	     */
-
+	
 	    /**
 	     * @ngdoc event
 	     * @name $route#$routeUpdate
@@ -1149,13 +1152,13 @@
 	     * @param {Object} angularEvent Synthetic event object
 	     * @param {Route} current Current/previous route information.
 	     */
-
+	
 	    var forceReload = false,
 	        preparedRoute,
 	        preparedRouteIsUpdateOnly,
 	        $route = {
 	          routes: routes,
-
+	
 	          /**
 	           * @ngdoc method
 	           * @name $route#reload
@@ -1169,7 +1172,7 @@
 	           */
 	          reload: function() {
 	            forceReload = true;
-
+	
 	            var fakeLocationEvent = {
 	              defaultPrevented: false,
 	              preventDefault: function fakePreventDefault() {
@@ -1177,13 +1180,13 @@
 	                forceReload = false;
 	              }
 	            };
-
+	
 	            $rootScope.$evalAsync(function() {
 	              prepareRoute(fakeLocationEvent);
 	              if (!fakeLocationEvent.defaultPrevented) commitRoute();
 	            });
 	          },
-
+	
 	          /**
 	           * @ngdoc method
 	           * @name $route#updateParams
@@ -1208,14 +1211,14 @@
 	            }
 	          }
 	        };
-
+	
 	    $rootScope.$on('$locationChangeStart', prepareRoute);
 	    $rootScope.$on('$locationChangeSuccess', commitRoute);
-
+	
 	    return $route;
-
+	
 	    /////////////////////////////////////////////////////
-
+	
 	    /**
 	     * @param on {string} current url
 	     * @param route {Object} route regexp to match the url against
@@ -1230,32 +1233,32 @@
 	    function switchRouteMatcher(on, route) {
 	      var keys = route.keys,
 	          params = {};
-
+	
 	      if (!route.regexp) return null;
-
+	
 	      var m = route.regexp.exec(on);
 	      if (!m) return null;
-
+	
 	      for (var i = 1, len = m.length; i < len; ++i) {
 	        var key = keys[i - 1];
-
+	
 	        var val = m[i];
-
+	
 	        if (key && val) {
 	          params[key.name] = val;
 	        }
 	      }
 	      return params;
 	    }
-
+	
 	    function prepareRoute($locationEvent) {
 	      var lastRoute = $route.current;
-
+	
 	      preparedRoute = parseRoute();
 	      preparedRouteIsUpdateOnly = preparedRoute && lastRoute && preparedRoute.$$route === lastRoute.$$route
 	          && angular.equals(preparedRoute.pathParams, lastRoute.pathParams)
 	          && !preparedRoute.reloadOnSearch && !forceReload;
-
+	
 	      if (!preparedRouteIsUpdateOnly && (lastRoute || preparedRoute)) {
 	        if ($rootScope.$broadcast('$routeChangeStart', preparedRoute, lastRoute).defaultPrevented) {
 	          if ($locationEvent) {
@@ -1264,11 +1267,11 @@
 	        }
 	      }
 	    }
-
+	
 	    function commitRoute() {
 	      var lastRoute = $route.current;
 	      var nextRoute = preparedRoute;
-
+	
 	      if (preparedRouteIsUpdateOnly) {
 	        lastRoute.params = nextRoute.params;
 	        angular.copy(lastRoute.params, $routeParams);
@@ -1287,18 +1290,18 @@
 	            }
 	          }
 	        }
-
+	
 	        $q.when(nextRoute).
 	          then(function() {
 	            if (nextRoute) {
 	              var locals = angular.extend({}, nextRoute.resolve),
 	                  template, templateUrl;
-
+	
 	              angular.forEach(locals, function(value, key) {
 	                locals[key] = angular.isString(value) ?
 	                    $injector.get(value) : $injector.invoke(value, null, null, key);
 	              });
-
+	
 	              if (angular.isDefined(template = nextRoute.template)) {
 	                if (angular.isFunction(template)) {
 	                  template = template(nextRoute.params);
@@ -1334,8 +1337,8 @@
 	          });
 	      }
 	    }
-
-
+	
+	
 	    /**
 	     * @returns {Object} the current active route, by matching it against the URL
 	     */
@@ -1353,7 +1356,7 @@
 	      // No route matched; fallback to "otherwise" route
 	      return match || routes[null] && inherit(routes[null], {params: {}, pathParams:{}});
 	    }
-
+	
 	    /**
 	     * @returns {string} interpolation of the redirect path with the parameters
 	     */
@@ -1374,10 +1377,10 @@
 	    }
 	  }];
 	}
-
+	
 	ngRouteModule.provider('$routeParams', $RouteParamsProvider);
-
-
+	
+	
 	/**
 	 * @ngdoc service
 	 * @name $routeParams
@@ -1414,11 +1417,11 @@
 	function $RouteParamsProvider() {
 	  this.$get = function() { return {}; };
 	}
-
+	
 	ngRouteModule.directive('ngView', ngViewFactory);
 	ngRouteModule.directive('ngView', ngViewFillContentFactory);
-
-
+	
+	
 	/**
 	 * @ngdoc directive
 	 * @name ngView
@@ -1471,26 +1474,26 @@
 	          <a href="Book/Gatsby">Gatsby</a> |
 	          <a href="Book/Gatsby/ch/4?key=value">Gatsby: Ch4</a> |
 	          <a href="Book/Scarlet">Scarlet Letter</a><br/>
-
+	
 	          <div class="view-animate-container">
 	            <div ng-view class="view-animate"></div>
 	          </div>
 	          <hr />
-
+	
 	          <pre>$location.path() = {{main.$location.path()}}</pre>
 	          <pre>$route.current.templateUrl = {{main.$route.current.templateUrl}}</pre>
 	          <pre>$route.current.params = {{main.$route.current.params}}</pre>
 	          <pre>$routeParams = {{main.$routeParams}}</pre>
 	        </div>
 	      </file>
-
+	
 	      <file name="book.html">
 	        <div>
 	          controller: {{book.name}}<br />
 	          Book Id: {{book.params.bookId}}<br />
 	        </div>
 	      </file>
-
+	
 	      <file name="chapter.html">
 	        <div>
 	          controller: {{chapter.name}}<br />
@@ -1498,7 +1501,7 @@
 	          Chapter Id: {{chapter.params.chapterId}}
 	        </div>
 	      </file>
-
+	
 	      <file name="animations.css">
 	        .view-animate-container {
 	          position:relative;
@@ -1508,18 +1511,18 @@
 	          height:40px;
 	          overflow:hidden;
 	        }
-
+	
 	        .view-animate {
 	          padding:10px;
 	        }
-
+	
 	        .view-animate.ng-enter, .view-animate.ng-leave {
 	          transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;
-
+	
 	          display:block;
 	          width:100%;
 	          border-left:1px solid black;
-
+	
 	          position:absolute;
 	          top:0;
 	          left:0;
@@ -1527,7 +1530,7 @@
 	          bottom:0;
 	          padding:10px;
 	        }
-
+	
 	        .view-animate.ng-enter {
 	          left:100%;
 	        }
@@ -1538,7 +1541,7 @@
 	          left:-100%;
 	        }
 	      </file>
-
+	
 	      <file name="script.js">
 	        angular.module('ngViewExample', ['ngRoute', 'ngAnimate'])
 	          .config(['$routeProvider', '$locationProvider',
@@ -1554,7 +1557,7 @@
 	                  controller: 'ChapterCtrl',
 	                  controllerAs: 'chapter'
 	                });
-
+	
 	              $locationProvider.html5Mode(true);
 	          }])
 	          .controller('MainCtrl', ['$route', '$routeParams', '$location',
@@ -1571,9 +1574,9 @@
 	            this.name = "ChapterCtrl";
 	            this.params = $routeParams;
 	          }]);
-
+	
 	      </file>
-
+	
 	      <file name="protractor.js" type="protractor">
 	        it('should load and compile correct template', function() {
 	          element(by.linkText('Moby: Ch1')).click();
@@ -1581,9 +1584,9 @@
 	          expect(content).toMatch(/controller\: ChapterCtrl/);
 	          expect(content).toMatch(/Book Id\: Moby/);
 	          expect(content).toMatch(/Chapter Id\: 1/);
-
+	
 	          element(by.partialLinkText('Scarlet')).click();
-
+	
 	          content = element(by.css('[ng-view]')).getText();
 	          expect(content).toMatch(/controller\: BookCtrl/);
 	          expect(content).toMatch(/Book Id\: Scarlet/);
@@ -1591,8 +1594,8 @@
 	      </file>
 	    </example>
 	 */
-
-
+	
+	
 	/**
 	 * @ngdoc event
 	 * @name ngView#$viewContentLoaded
@@ -1613,16 +1616,16 @@
 	            previousLeaveAnimation,
 	            autoScrollExp = attr.autoscroll,
 	            onloadExp = attr.onload || '';
-
+	
 	        scope.$on('$routeChangeSuccess', update);
 	        update();
-
+	
 	        function cleanupLastView() {
 	          if (previousLeaveAnimation) {
 	            $animate.cancel(previousLeaveAnimation);
 	            previousLeaveAnimation = null;
 	          }
-
+	
 	          if (currentScope) {
 	            currentScope.$destroy();
 	            currentScope = null;
@@ -1635,15 +1638,15 @@
 	            currentElement = null;
 	          }
 	        }
-
+	
 	        function update() {
 	          var locals = $route.current && $route.current.locals,
 	              template = locals && locals.$template;
-
+	
 	          if (angular.isDefined(template)) {
 	            var newScope = scope.$new();
 	            var current = $route.current;
-
+	
 	            // Note: This will also link all children of ng-view that were contained in the original
 	            // html. If that content contains controllers, ... they could pollute/change the scope.
 	            // However, using ng-view on an element with additional content does not make sense...
@@ -1659,7 +1662,7 @@
 	              });
 	              cleanupLastView();
 	            });
-
+	
 	            currentElement = clone;
 	            currentScope = current.scope = newScope;
 	            currentScope.$emit('$viewContentLoaded');
@@ -1671,7 +1674,7 @@
 	    }
 	  };
 	}
-
+	
 	// This directive is called during the $transclude call of the first `ngView` directive.
 	// It will replace and compile the content of the element with the loaded template.
 	// We need this directive so that the element content is already filled when
@@ -1685,11 +1688,11 @@
 	    link: function(scope, $element) {
 	      var current = $route.current,
 	          locals = current.locals;
-
+	
 	      $element.html(locals.$template);
-
+	
 	      var link = $compile($element.contents());
-
+	
 	      if (current.controller) {
 	        locals.$scope = scope;
 	        var controller = $controller(current.controller, locals);
@@ -1700,13 +1703,13 @@
 	        $element.children().data('$ngControllerController', controller);
 	      }
 	      scope[current.resolveAs || '$resolve'] = locals;
-
+	
 	      link(scope);
 	    }
 	  };
 	}
-
-
+	
+	
 	})(window, window.angular);
 
 
@@ -1715,26 +1718,26 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.controllers = undefined;
-
+	
 	var _gisDataCtrl = __webpack_require__(4);
-
+	
 	var _gisDataCtrl2 = _interopRequireDefault(_gisDataCtrl);
-
+	
 	var _userCtrl = __webpack_require__(5);
-
+	
 	var _userCtrl2 = _interopRequireDefault(_userCtrl);
-
+	
 	var _uploadCtrl = __webpack_require__(6);
-
+	
 	var _uploadCtrl2 = _interopRequireDefault(_uploadCtrl);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+	
 	var controllers = exports.controllers = {
 	    gisDataCtrl: _gisDataCtrl2.default,
 	    userCtrl: _userCtrl2.default,
@@ -1748,22 +1751,30 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	/**
 	 * Created by LikoLu on 2016/4/21.
 	 */
-
-	function gisDataCtrl($scope, gisData) {
+	
+	function gisDataCtrl($scope, gisData, $timeout) {
 	    $scope.message = 'Gisdata Page';
+	    $scope.alertInfo = '';
+	    $scope.gisID = '123';
 	    $scope.gisdata = gisData.getGisData();
 	    $scope.$on('gisdata.updated', function () {
 	        $scope.gisdata = gisData.getGisData();
 	    });
+	    $scope.$on('gisdata.deleted', function () {
+	        $scope.gisdata = gisData.getGisData();
+	    });
+	    $scope.deleteGisData = function () {
+	        gisData.deleteGisData($scope.gisID);
+	    };
 	}
-	gisDataCtrl.$inject = ['$scope', 'gisData'];
+	gisDataCtrl.$inject = ['$scope', 'gisData', '$timeout'];
 	exports.default = gisDataCtrl;
 
 /***/ },
@@ -1771,7 +1782,7 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
@@ -1789,7 +1800,7 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
@@ -1807,18 +1818,18 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	exports.services = undefined;
-
+	
 	var _gisData = __webpack_require__(8);
-
+	
 	var _gisData2 = _interopRequireDefault(_gisData);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+	
 	var services = exports.services = {
 	  gisData: _gisData2.default
 	}; /**
@@ -1830,15 +1841,15 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-
+	
 	var _server = __webpack_require__(9);
-
-	function gisData($http, $rootScope) {
-	    var GisData = {};
+	
+	function gisData($http, $rootScope, $location) {
+	    var GisData = [];
 	    $http.post(_server.API.getGisData, {
 	        user_id: 1,
 	        type: 'all'
@@ -1848,16 +1859,34 @@
 	    }).error(function (data) {
 	        console.log(data);
 	    });
-
+	
 	    this.getGisData = function () {
 	        return Object.assign({}, GisData);
 	    };
-	    this.deleteGisData = function (coll) {};
+	    this.deleteGisData = function (id) {
+	        $rootScope.$broadcast('gisdata.isdeleting');
+	        $http.post(_server.API.deleteGisData, {
+	            user_id: 1,
+	            coll_name: 'data_' + id
+	        }).success(function (data) {
+	            console.log('success');
+	            var t = [];
+	            for (var i in GisData) {
+	                if (GisData[i].id != id) {
+	                    t.push(GisData[i]);
+	                }
+	            }
+	            GisData = t;
+	            $rootScope.$broadcast('gisdata.deleted');
+	        }).error(function (data) {
+	            console.log(data);
+	        });
+	    };
 	} /**
 	   * Created by Vico on 2016.05.02.
 	   */
-
-	gisData.$inject = ['$http', '$rootScope'];
+	
+	gisData.$inject = ['$http', '$rootScope', '$location'];
 	exports.default = gisData;
 
 /***/ },
@@ -1865,18 +1894,19 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	/**
 	 * Created by Vico on 2016.05.02.
 	 */
 	var baseUrl = 'http://localhost/Projects/gis-with-mongo/interface/';
-
+	
 	var API = exports.API = {
-	  getGisData: baseUrl + 'getGisData.php',
-	  editGeoJSON: baseUrl + 'editGeoJSON.php'
+	    getGisData: baseUrl + 'getGisData.php',
+	    editGeoJSON: baseUrl + 'editGeoJSON.php',
+	    deleteGisData: baseUrl + 'deleteGisData.php'
 	};
 
 /***/ },
@@ -1884,46 +1914,50 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.directives = undefined;
-
+	
 	var _myFooter = __webpack_require__(11);
-
+	
 	var _myFooter2 = _interopRequireDefault(_myFooter);
-
+	
 	var _modifyUserInfo = __webpack_require__(12);
-
+	
 	var _modifyUserInfo2 = _interopRequireDefault(_modifyUserInfo);
-
+	
 	var _mySkill = __webpack_require__(13);
-
+	
 	var _mySkill2 = _interopRequireDefault(_mySkill);
-
+	
 	var _myDate = __webpack_require__(14);
-
+	
 	var _myDate2 = _interopRequireDefault(_myDate);
-
+	
+	var _myConfirmDel = __webpack_require__(15);
+	
+	var _myConfirmDel2 = _interopRequireDefault(_myConfirmDel);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/**
-	 * Created by LikoLu on 2016/4/25.
-	 */
+	
 	var directives = exports.directives = {
 	    myFooter: _myFooter2.default,
 	    modifyUserInfo: _modifyUserInfo2.default,
 	    mySkill: _mySkill2.default,
-	    myDate: _myDate2.default
-	};
+	    myDate: _myDate2.default,
+	    myConfirmDel: _myConfirmDel2.default
+	}; /**
+	    * Created by LikoLu on 2016/4/25.
+	    */
 
 /***/ },
 /* 11 */
 /***/ function(module, exports) {
 
 	"use strict";
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
@@ -1943,14 +1977,14 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	/**
 	 * Created by LikoLu on 2016/4/26.
 	 */
-
+	
 	function modifyUserInfo(userInfo, $location) {
 	    return {
 	        restrict: 'A',
@@ -1971,7 +2005,7 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
@@ -1994,7 +2028,7 @@
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
@@ -2025,10 +2059,62 @@
 
 /***/ },
 /* 15 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	/**
+	 * Created by Vico on 2016.05.02.
+	 */
+	
+	function myConfirmDel(gisData, $timeout) {
+	    return {
+	        restrict: "EA",
+	        scope: {
+	            id: '@id',
+	            info: '=info',
+	            curID: '=curid'
+	        },
+	        template: "<button class='btn btn-danger delete-confirm' title='del' ng-click='del()'><i class='icon-trash'></i> </button>",
+	        link: function link(scope, element, attrs) {
+	            scope.del = function () {
+	                scope.info = '确认删除？';
+	                scope.curID = scope.id;
+	                angular.element('#confirmModal').modal('show');
+	            };
+	
+	            scope.$on('gisdata.isdeleting', function () {
+	                scope.info = '删除中，请稍后...';
+	            });
+	            scope.$on('gisdata.deleted', function () {
+	                scope.info = '删除成功';
+	                scope.curID = scope.id;
+	                $timeout(function () {
+	                    angular.element('#confirmModal').modal('hide');
+	                }, 1500);
+	            });
+	            scope.$on('gisdata.fail', function () {
+	                scope.info = '删除失败,请重试';
+	                $timeout(function () {
+	                    angular.element('#confirmModal').modal('hide');
+	                }, 1500);
+	            });
+	        },
+	        transclude: true
+	    };
+	}
+	myConfirmDel.$inject = ['gisData', '$timeout'];
+	exports.default = myConfirmDel;
+
+/***/ },
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
@@ -2036,28 +2122,36 @@
 	 * Created by LikoLu on 2016/4/26.
 	 */
 	var tmpls = exports.tmpls = {
-	    gisdata: __webpack_require__(16),
-	    user: __webpack_require__(17),
-	    upload: __webpack_require__(18)
+	    gisdata: __webpack_require__(17),
+	    user: __webpack_require__(18),
+	    upload: __webpack_require__(19),
+	    gisDetail: __webpack_require__(20)
 	};
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='show-gis.html?gis={{item.id}}' target=\"blank\" style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <button class=\"btn btn-danger delete-confirm\" title='删除'> <i class=\"icon-trash\"></i> </button>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n";
 
 /***/ },
 /* 17 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"row\" >\r\n    <div class=\"content\">\r\n        个人信息\r\n    </div>\r\n</div>";
+	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='show-gis.html?gis={{item.id}}' target=\"blank\" style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <my-confirm-del id={{item.id}} info=\"$parent.alertInfo\" curid=\"$parent.gisID\">\r\n                    </my-confirm-del>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n\r\n<!--Modal-->\r\n<div class=\"modal fade\" id=\"confirmModal\" tabindex=\"-1\" role=\"dialog\"\r\n     aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-header\">\r\n                <button type=\"button\" class=\"close\"\r\n                        data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                    &times;\r\n                </button>\r\n                <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                    提示\r\n                </h4>\r\n            </div>\r\n            <div class=\"modal-body\">\r\n              <span  ng-bind=\"alertInfo\">\r\n              </span>\r\n            </div>\r\n            <div class=\"modal-footer\">\r\n                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteGisData()\"\r\n                >确定\r\n                </button>\r\n                <button type=\"button\" class=\"btn btn-default\"\r\n                        data-dismiss=\"modal\">取消\r\n                </button>\r\n            </div>\r\n        </div><!-- /.modal-content -->\r\n    </div><!-- /.modal -->\r\n</div>\r\n";
 
 /***/ },
 /* 18 */
 /***/ function(module, exports) {
 
+	module.exports = "<div class=\"row\" >\r\n    <div class=\"content\">\r\n        个人信息\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
 	module.exports = "<div class=\"row\">\r\n    <div class=\"content\">\r\n        <form action=\"interface/upload.php\" method=\"post\" enctype=\"multipart/form-data\">\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传GeoJSON</label><br>\r\n                <button class=\"btn btn-primary openfile-btn\" type='button'>\r\n                    <span class=\"glyphicon glyphicon-folder-open\"></span>\r\n                    <span>&nbsp;&nbsp;.json文件</span>\r\n                </button>\r\n                <span class=\"filename\"></span>\r\n                <input name='geo' type='file' style='display:none' class='openfile'/><br>\r\n            </div>\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传Shapefile</label><br>\r\n                <div>\r\n                    <button class=\"btn btn-primary openfile-btn\" type='button'>\r\n                        <span class=\"glyphicon glyphicon-folder-open\"></span>\r\n                        <span>&nbsp;&nbsp;.shp文件</span>\r\n                    </button>\r\n                    <span class=\"filename\"></span>\r\n                    <input name='shp' type='file' style='display:none' class='openfile'/>\r\n                </div>\r\n                <br>\r\n                <div>\r\n                    <button class=\"btn btn-primary openfile-btn\" type='button'>\r\n                        <span class=\"glyphicon glyphicon-folder-open\"></span>\r\n                        <span>&nbsp;&nbsp;.dbf文件</span>\r\n                    </button>\r\n                    <span class=\"filename\"></span>\r\n                    <input name='dbf' type='file' style='display:none' class='openfile'/>\r\n                </div>\r\n            </div>\r\n\r\n            <button class=\"btn btn-success btn-block\" type=\"submit\">\r\n              <span class=\"glyphicon glyphicon-open\">\r\n              </span><span>&nbsp;&nbsp;上传</span>\r\n            </button>\r\n        </form>\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"map-area col-sm-7\">\r\n        <div id=\"map\"></div>\r\n    </div>\r\n    <div class=\"col-sm-5\" id=\"sider-bar\" >\r\n        <div class=\"row\" >\r\n            <div class=\"col-sm-9\" style=\"height:520px;overflow: hidden;overflow-y: auto\" >\r\n                <div class=\"panel panel-body\">\r\n                    <table class=\"table\">\r\n                        <caption class='tc'>\r\n                            <span class='f18 c666'>gis数据记录信息</span>&nbsp;&nbsp;\r\n                  <span\r\n                          style='cursor:pointer;color:#51A6E8'\r\n                          ng-class=\"{true:'icon-chevron-up',false:'icon-chevron-down'}[Flag.isShowRecord]\"\r\n                          ng-click='Flag.isShowRecord = !Flag.isShowRecord'></span>\r\n                        </caption>\r\n                        <tbody ng-show='Flag.isShowRecord'>\r\n                        <tr ng-repeat=\"(x,y) in record\">\r\n                            <th ng-bind='recordMap[x]'></th>\r\n                            <td ng-bind='y'></td>\r\n                        </tr>\r\n                        </tbody>\r\n                    </table>\r\n                </div>\r\n                <div class='panel panel-body' ng-show='Flag.isEditingVector' ng-cloak>\r\n                    当前选中特征属性：\r\n                    <p ng-show='!Flag.hasSelected'>当前未选中特征</p>\r\n                    <div ng-show='Flag.hasSelected'>\r\n                        <table class='table'>\r\n                            <tr class='f14'>\r\n                                <th style=\"width: 25%\">属性</th>\r\n                                <td style=\"width: 47%\">值</td>\r\n                                <td style=\"width: 28%\">操作</td>\r\n                            </tr>\r\n                            <tr ng-repeat=\"(x,y) in featureProps\">\r\n                                <th>\r\n                                    <span ng-bind='x' ></span>\r\n                                </th>\r\n                                <td>\r\n                                    <span >{{y}}</span>\r\n                                </td>\r\n                                <td class='edit-group'>\r\n                                    <span href=\"\" ng-class=\"{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]\" ng-click=\"editProp('edit', x, y)\"></span>\r\n                                    <span href=\"\" class=\"icon-trash delete edit-item\" ng-click=\"editProp('showConfirmModal', x, y)\" ></span>\r\n                                </td>\r\n                            </tr>\r\n                        </table>\r\n                        <hr>\r\n                        <!-- 正在编辑属性 -->\r\n                        <div ng-show='Flag.isEditingProp'>\r\n                            <div class=\"row\">\r\n                                <div class=\"col-sm-6\">\r\n                                    属性：<input type=\"text\" placeholder='属性值' ng--model='propName' ng-readonly='!Flag.isAddingProp'>\r\n                                    <span class=\"icon-ok edit-btn\" ng-click=\"editProp('save')\"></span>\r\n                                </div>\r\n                                <div class=\"col-sm-6\">\r\n                                    值：<input type=\"text\" placeholder='属性值' ng--model='propValue'>\r\n                                    <span class=\"icon-remove edit-btn\" ng-click=\"editProp('cancle')\"></span>\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                        <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>\r\n                            <button\r\n                                    title='添加属性'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click='editProp(\"add\")'>\r\n                                <span class=\"icon-plus\"></span>\r\n                            </button>\r\n                            <button\r\n                                    title='保存修改'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click=\"saveGis('save')\">\r\n                                <span class=\"icon-save\"></span>\r\n                            </button>\r\n                            <button\r\n                                    title='删除特征'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click=\"saveGis('delete_confirm')\">\r\n                                <span class=\"icon-trash\"></span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"col-sm-3 \">\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"toggleTilelayer()\"\r\n                    >\r\n                        <span ng-show='!Flag.isOpenTile'>开启</span>\r\n                        <span ng-show='Flag.isOpenTile'>关闭</span>\r\n                        Tile层</button>\r\n                </p>\r\n                <hr>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"editGis()\"\r\n                            ng-show='!Flag.isEditingVector'\r\n                    >编辑特征</button>\r\n                </p>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"saveGis('cancle')\"\r\n                            ng-show='Flag.isEditingVector'\r\n                    >退出编辑</button>\r\n                </p>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- 模态框 -->\r\n    <div ng-include=\"'tmpl/removePropModal.html'\" ></div>\r\n    <div ng-include=\"'tmpl/deleteGisModal.html'\" ></div>\r\n\r\n    <!-- popupOverlayer -->\r\n    <div id=\"popup\" class=\"ol-popup\">\r\n        <p id='title' class='tc'>特征属性</p>\r\n        <div class=\"popup-content\">\r\n            <table class='f12'>\r\n                <tr ng-repeat=\"(x,y) in featureProps\">\r\n                    <th class='tr'>\r\n                        <span ng-bind='x'></span>：\r\n                    </th>\r\n                    <td>\r\n                        <span >{{y}}</span>\r\n                    </td>\r\n                </tr>\r\n            </table>\r\n        </div>\r\n    </div>\r\n</div>";
 
 /***/ }
 /******/ ]);
+//# sourceMappingURL=bundle.js.map

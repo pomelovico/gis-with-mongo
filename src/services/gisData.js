@@ -4,8 +4,8 @@
 
 import {API} from '../constants/server';
 
-function gisData($http, $rootScope){
-    var GisData = {};
+function gisData($http, $rootScope,$location){
+    var GisData = [];
     $http.post(
         API.getGisData,
         {
@@ -21,9 +21,27 @@ function gisData($http, $rootScope){
     this.getGisData = ()=>{
         return Object.assign({},GisData);
     };
-    this.deleteGisData = (coll)=>{
-
+    this.deleteGisData = (id)=>{
+        $rootScope.$broadcast('gisdata.isdeleting');
+        $http.post(
+            API.deleteGisData,
+            {
+                user_id:1,
+                coll_name:`data_${id}`
+            })
+            .success((data)=>{
+                console.log('success');
+                let t = [];
+                for (let i in GisData){
+                    if(GisData[i].id != id){
+                        t.push(GisData[i]);
+                    }
+                }
+                GisData = t;
+                $rootScope.$broadcast('gisdata.deleted');
+            })
+            .error((data)=>{console.log(data)});
     };
 }
-gisData.$inject = ['$http','$rootScope'];
+gisData.$inject = ['$http','$rootScope','$location'];
 export default gisData;

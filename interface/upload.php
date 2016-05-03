@@ -155,7 +155,7 @@ class GisData{
 
         for($i = 0; $i < $records_len; $i+=1){
             $n = explode("(",explode(".$file_type",$records[$i]['file_name'])[0])[0];
-            echo $n.'<br>';
+//            echo $n.'<br>';
             if($n == basename($current_name,".$file_type")) {
                 $same_filename_count += 1;
             }
@@ -178,7 +178,8 @@ class GisData{
             if(!$user_data_record){
                 throw new MongoException('DB_FAIL_FIND_USER_RECORD');
             }
-            $user_gis_records = $user_data_record->next()['gis_records'];
+            $user_gis_records = $user_data_record->getNext()['gis_records'];
+
         }catch (MongoException $e){
             TriggerError($e);
         }

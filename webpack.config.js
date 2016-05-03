@@ -9,6 +9,7 @@ module.exports = {
         'webpack/hot/dev-server',
         './src/index.js'
     ],*/
+    devtool:"source-map",
     entry: {
         bundle:'./src/index.js'
     },
