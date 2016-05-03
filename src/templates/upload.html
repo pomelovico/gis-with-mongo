@@ -3,32 +3,22 @@
         <form action="interface/upload.php" method="post" enctype="multipart/form-data">
             <div class="form-group col-sm-6">
                 <label>上传GeoJSON</label><br>
-                <button class="btn btn-primary openfile-btn" type='button'>
-                    <span class="glyphicon glyphicon-folder-open"></span>
-                    <span>&nbsp;&nbsp;.json文件</span>
-                </button>
-                <span class="filename"></span>
-                <input name='geo' type='file' style='display:none' class='openfile'/><br>
+                <my-select-btn filetype="geo">
+                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.json文件</span>
+                    <input name='geo' id="geo" type='file' style='display:none' class='openfile'/>
+                </my-select-btn>
             </div>
             <div class="form-group col-sm-6">
                 <label>上传Shapefile</label><br>
-                <div>
-                    <button class="btn btn-primary openfile-btn" type='button'>
-                        <span class="glyphicon glyphicon-folder-open"></span>
-                        <span>&nbsp;&nbsp;.shp文件</span>
-                    </button>
-                    <span class="filename"></span>
-                    <input name='shp' type='file' style='display:none' class='openfile'/>
-                </div>
+                <my-select-btn filetype="shp">
+                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.shp文件</span>
+                    <input name='shp' id="shp" type='file' style='display:none' class='openfile'/>
+                </my-select-btn>
                 <br>
-                <div>
-                    <button class="btn btn-primary openfile-btn" type='button'>
-                        <span class="glyphicon glyphicon-folder-open"></span>
-                        <span>&nbsp;&nbsp;.dbf文件</span>
-                    </button>
-                    <span class="filename"></span>
-                    <input name='dbf' type='file' style='display:none' class='openfile'/>
-                </div>
+                <my-select-btn filetype="dbf">
+                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.dbf文件</span>
+                    <input name='dbf' id="dbf" type='file' style='display:none' class='openfile'/>
+                </my-select-btn>
             </div>
 
             <button class="btn btn-success btn-block" type="submit">

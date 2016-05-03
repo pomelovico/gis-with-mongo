@@ -76,6 +76,7 @@ app.service('gisData',services.gisData);
 
 /*指令*/
 app.directive('myConfirmDel',directives.myConfirmDel);
+app.directive('mySelectBtn',directives.mySelectBtn);
 
 
 /*控制器*/

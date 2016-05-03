@@ -54,7 +54,7 @@ if($type=='all'){
 	}
 	$geo_coll['features'] = $features;
 	$coll = $db->selectCollection('gis_data_records');
-	$record = $coll->find(array(coll_name=>$coll_name))->next();
+	$record = $coll->find(array(coll_name=>$coll_name))->getNext();
 	$data = array(
 		gis=>$geo_coll,
 		record=>array(
