@@ -67,10 +67,10 @@ function mapService($rootScope){
                 featureProps = t;
                 oldID = features[0].getId();
                 $rootScope.$broadcast('featureProps.updated',t);
-                $rootScope.$broadcast('mouserOverMap.updated',true;
+                $rootScope.$broadcast('mouserOverMap.updated',true);
             }
         }else{
-            $rootScope.$broadcast('mouserOverMap.updated',false;
+            $rootScope.$broadcast('mouserOverMap.updated',false);
         }
     };
     /*绘制*/

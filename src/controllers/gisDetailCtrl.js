@@ -53,12 +53,12 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         mapService.removeListenMouse();
         mapService.addSelectAndModifyEvent();
         $scope.featureProps = {};
-
         $scope.Flag.isEditingVector = true;
-        $scope.Flag.isOverMap = false;
-
-
       };
+    $scope.cancleEdit = ()=>{
+        $scope.Flag.isEditingVector = false;
+    }
 }
+
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
 export  default gisDetailCtrl;

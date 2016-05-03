@@ -1,7 +1,7 @@
 <div class="row">
     <div class="map-area col-sm-7">
         <div id="map">
-            <div class="ol-popup" ng-show="Flag.isInMap">
+            <div class="ol-popup" ng-show="Flag.isOverMap">
                 <p id='title' class='tc'>特征属性</p>
                 <div class="popup-content">
                     <table class='f12'>
@@ -124,7 +124,7 @@
                 <p>
                     <button
                             class="btn btn-block btn-default"
-                            ng-click="saveGis('cancle')"
+                            ng-click="cancleEdit()"
                             ng-show='Flag.isEditingVector'
                     >退出编辑</button>
                 </p>
