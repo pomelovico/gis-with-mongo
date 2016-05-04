@@ -7,8 +7,7 @@ function myEditPropsGroup(gisData,$timeout,$rootScope){
         restrict:"EA",
         scope:{
             key:'@key',
-            val:'@val',
-            info:'=alertinfo'
+            val:'@val'
         },
         template:"<span href='' class='icon-edit edit-item ' ng-click='editProp()'></span> " +
         "<span href='' class='icon-trash delete edit-item' ng-click='confirmDeleteProps()' ></span>",
@@ -21,11 +20,11 @@ function myEditPropsGroup(gisData,$timeout,$rootScope){
 
             };
             scope.confirmDeleteProps = ()=>{
-                scope.info = '确认移除此属性？';
+                scope.$emit('alertInfo.updated','确认移除此属性？');
                 angular.element('#removePropModal').modal('show');
                 scope.$emit('currentProp.updated',{k:scope.key,v:scope.val});
             };
-            scope.$on('props.removed',()=>{
+            scope.$on('featureProps.updated',()=>{
                 $timeout(()=>{
                     angular.element('#removePropModal').modal('hide');
                     scope.$emit('currentProp.updated',{k:'',v:''});

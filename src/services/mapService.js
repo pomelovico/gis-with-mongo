@@ -173,14 +173,15 @@ function mapService($rootScope){
             item.setStyle();
         });
     };
+    /*移除当前特征属性*/
     this.removeProps = key=>{
         var features = interaction.select.getFeatures();
         features.item(0).unset(key);
         var t = features.item(0).getProperties();
         delete t.geometry;
         $rootScope.$broadcast('featureProps.updated',t);
-        $rootScope.$broadcast('props.removed');
     };
+    /*更新属性*/
     this.updateProps =(props)=>{
         var features = interaction.select.getFeatures();
         features.item(0).setProperties({
@@ -189,6 +190,29 @@ function mapService($rootScope){
         var t = features.item(0).getProperties();
         delete t.geometry;
         $rootScope.$broadcast('featureProps.updated',t);
+        $rootScope.$broadcast('featureProps.updated',t);
+    };
+    /*获取要保存的特征属性*/
+    this.getFeatureToSave = ()=>{
+        /*获取当前选中的特征数据*/
+        var f = new ol.format.GeoJSON();
+        var feature = interaction.select.getFeatures();
+        return f.writeFeature(feature.item(0));
+    };
+    
+    var curerntFeatureID = -1;
+    /*获取要删除的特征属性*/
+    this.getIdOfFeatureToDelete = ()=>{
+        /*获取当前选中的特征数据*/
+        var f = new ol.format.GeoJSON();
+        var feature = interaction.select.getFeatures();
+        curerntFeatureID = feature.item(0).getId();
+        return curerntFeatureID;
+    };
+    this.deleteFeature = ()=>{
+        console.log(curerntFeatureID);
+        vectorLayer.getSource().removeFeature(vectorSource.getFeatureById(curerntFeatureID));
+        curerntFeatureID = -1;
     }
 }
 mapService.$inject = ['$rootScope'];

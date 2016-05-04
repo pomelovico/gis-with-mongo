@@ -19,6 +19,10 @@ function myEditProps(){
                 }
                 scope.$emit('isEditingProp.updated',false);
                 scope.$emit('isAddingProp.updated',false);
+                scope.$emit('currentProp.updated',{k:'',v:''});
+            });
+            scope.$on('featureProps.updated',()=>{
+                scope.$emit('currentProp.updated',{k:'',v:''});
             });
         },
         transclude: true

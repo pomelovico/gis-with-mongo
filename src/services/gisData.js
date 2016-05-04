@@ -61,6 +61,42 @@ function gisData($http, $rootScope,$location){
     this.getDetailGis = id=>{
         return Object.assign({},DetailGisData);
     }
+    this.saveFeature = postData=>{
+        $http.post(
+              API.editGeoJSON,
+              postData
+          )
+          .success(function(data){
+            console.log('success to save');
+            $rootScope.$broadcast('feature.saved');
+            /*if(type=='delete'){
+              $('#deleteGis').modal('hide');
+              MAP.layers.vectorLayer.getSource().removeFeature(feature.item(0));
+              setDefaultState('delete-edit-gis');
+            }*/
+          })
+          .error(function(data){
+            console.log('faile to save');
+        });
+    };
+    this.deleteFeature = postData=>{
+        $http.post(
+            API.editGeoJSON,
+            postData
+            )
+            .success(function(data){
+                console.log('success to delete');
+                $rootScope.$broadcast('feature.deleted');
+                /*if(type=='delete'){
+                 $('#deleteGis').modal('hide');
+                 MAP.layers.vectorLayer.getSource().removeFeature(feature.item(0));
+                 setDefaultState('delete-edit-gis');
+                 }*/
+            })
+            .error(function(data){
+                console.log('faile to save');
+            });
+    };
 }
 gisData.$inject = ['$http','$rootScope','$location'];
 export default gisData;

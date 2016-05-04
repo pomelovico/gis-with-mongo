@@ -52,12 +52,7 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
             mapService.drawMap(GISDATA.gis);
         }
     });
-    $scope.$on('featureProps.updated',(e,data)=>{
-        // data.status == 'inpo'
-        $scope.$safeApply(()=>{
-            $scope.featureProps = data;
-        });
-    });
+    $scope.$on('featureProps.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.featureProps = data;});});
     $scope.$on('mouserOverMap.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isOverMap = data;});});
     $scope.$on('hasSelected.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.hasSelected = data;});});
     $scope.$on('hasModified.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.hasModified = data;});});
@@ -66,7 +61,12 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
     $scope.$on('isShowRecord.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isShowRecord = data;});});
     $scope.$on('isAddingProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isAddingProp = data;});});
     $scope.$on('currentProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.currentProps = data});});
+    $scope.$on('alertInfo.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.alertInfo = data});});
 
+    $scope.$on('feature.deleted',()=>{
+        mapService.deleteFeature();
+        // $scope.$safeApply(()=>{$scope.featureProps = {};});
+    });
     /*编辑GIS数据——图形*/
     $scope.editGis = ()=>{
         /*移除鼠标移动事件监听*/
@@ -84,6 +84,27 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
     $scope.updateProps = ()=>{
         mapService.updateProps($scope.currentProps);
     };
+/*    $scope.addPropToFeature = ()=>{
+        // mapService.updateProps($scope.currentProps);
+    };*/
+    $scope.saveFeature = ()=>{
+        console.log('save');
+        let postData = {
+            coll_name:$routeParams.id,
+            type:'save',
+            data:mapService.getFeatureToSave()
+        };
+        gisData.saveFeature(postData);
+    };
+    $scope.deleteFeature = ()=>{
+        console.log('delete');
+        let postData = {
+            coll_name:$routeParams.id,
+            type:'delete',
+            data:JSON.stringify({id : mapService.getIdOfFeatureToDelete()})
+        };
+        gisData.deleteFeature(postData);
+    }
 }
 
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
