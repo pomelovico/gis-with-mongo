@@ -376,7 +376,7 @@ app.controller('gisCtrl',function($scope,$http){
           $scope.featureProps[$scope.propName] = $scope.propValue;
 
           setDefaultState('save-edit-prop');
-          break
+          break;
       case 'cancle':
           setDefaultState('cancle-edit-prop');
           break;

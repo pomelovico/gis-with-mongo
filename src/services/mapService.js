@@ -160,6 +160,36 @@ function mapService($rootScope){
         interaction['modify'] = modify;
         map.addInteraction(modify);
     };
+    this.removeSelectAndModifyEvent = ()=>{
+        /*添加鼠标滑动事件监听*/
+        map.on('pointermove',pointermoveListener);
+        /*移除select和modify*/
+        $rootScope.$broadcast('isEditingVector.updated',false);
+        $rootScope.$broadcast('hasSelected.updated',false);
+        $rootScope.$broadcast('hasModified.updated',false);
+        map.removeInteraction(interaction.modify);
+        map.removeInteraction(interaction.select);
+        vectorLayer.getSource().getFeatures().map(function(item){
+            item.setStyle();
+        });
+    };
+    this.removeProps = key=>{
+        var features = interaction.select.getFeatures();
+        features.item(0).unset(key);
+        var t = features.item(0).getProperties();
+        delete t.geometry;
+        $rootScope.$broadcast('featureProps.updated',t);
+        $rootScope.$broadcast('props.removed');
+    };
+    this.updateProps =(props)=>{
+        var features = interaction.select.getFeatures();
+        features.item(0).setProperties({
+            [props.k]:props.v
+        });
+        var t = features.item(0).getProperties();
+        delete t.geometry;
+        $rootScope.$broadcast('featureProps.updated',t);
+    }
 }
 mapService.$inject = ['$rootScope'];
 export default mapService;

@@ -58,8 +58,10 @@
                                     <span >{{y}}</span>
                                 </td>
                                 <td class='edit-group'>
-                                    <span href="" ng-class="{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]" ng-click="editProp('edit', x, y)"></span>
-                                    <span href="" class="icon-trash delete edit-item" ng-click="editProp('showConfirmModal', x, y)" ></span>
+                                <my-edit-props-group key={{x}} val={{y}} alertinfo="$parent.alertInfo" >
+                                </my-edit-props-group >
+                                    <!-- <span href="" ng-class="{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]" ng-click="editProp('edit', x, y)"></span>
+                                    <span href="" class="icon-trash delete edit-item" ng-click="editProp('showConfirmModal', x, y)" ></span> -->
                                 </td>
                             </tr>
                         </table>
@@ -68,12 +70,12 @@
                         <div ng-show='Flag.isEditingProp'>
                             <div class="row">
                                 <div class="col-sm-6">
-                                    属性：<input type="text" placeholder='属性值' ng--model='propName' ng-readonly='!Flag.isAddingProp'>
-                                    <span class="icon-ok edit-btn" ng-click="editProp('save')"></span>
+                                    属性：<input type="text" placeholder='属性值' ng-model='currentProps.k' ng-readonly='!Flag.isAddingProp'>
+                                    <my-edit-props class='icon-ok edit-btn' type='ok' update-props="updateProps()"></my-edit-props>
                                 </div>
                                 <div class="col-sm-6">
-                                    值：<input type="text" placeholder='属性值' ng--model='propValue'>
-                                    <span class="icon-remove edit-btn" ng-click="editProp('cancle')"></span>
+                                    值：<input type="text" placeholder='属性值' ng-model='currentProps.v'>
+                                    <my-edit-props class='icon-remove edit-btn' type='cancle'></my-edit-props>
                                 </div>
                             </div>
                         </div>
@@ -132,6 +134,33 @@
         </div>
     </div>
     <!-- 模态框 -->
-    <div ng-include="'tmpl/removePropModal.html'" ></div>
+    <div class="modal fade" id="removePropModal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        提示
+                    </h4>
+                </div>
+                <div class="modal-body" ng-bind="alertInfo">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" ng-click="removeProps()"
+                    >确定
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">取消
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+    <!--<div ng-include="'tmpl/removePropModal.html'" ></div>-->
     <div ng-include="'tmpl/deleteGisModal.html'" ></div>
 </div>

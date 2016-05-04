@@ -25,6 +25,24 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         hasSelected:false, /*是否有选中的特征*/
         isOverMap:false
     };
+    /*提示信息*/
+    $scope.alertInfo = '';
+    /*当前特征属性*/
+    $scope.currentProps = {
+        k:'',
+        v:''
+    };
+
+    $scope.$safeApply = function(fn) {
+         var phase = this.$root.$$phase;
+         if(phase == '$apply' || phase == '$digest') {
+         if(fn && (typeof(fn) === 'function')) {
+        fn();
+        }
+         }else {
+        this.$apply(fn);
+        }
+    };
     gisData.fecthGis($routeParams.id);
     /*监听来自service的广播事件*/
     $scope.$on('gisDetailData.updated',(e,data)=>{
@@ -35,20 +53,22 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         }
     });
     $scope.$on('featureProps.updated',(e,data)=>{
-        $scope.$apply(()=>{
+        // data.status == 'inpo'
+        $scope.$safeApply(()=>{
             $scope.featureProps = data;
         });
     });
-    $scope.$on('mouserOverMap.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isOverMap = data;});});
-    $scope.$on('hasSelected.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.hasSelected = data;});});
-    $scope.$on('hasModified.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.hasModified = data;});});
-    $scope.$on('isEditingVector.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isEditingVector = data;});});
-    $scope.$on('isEditingProp.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isEditingProp = data;});});
-    $scope.$on('isShowRecord.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isShowRecord = data;});});
-    $scope.$on('isAddingProp.updated',(e,data)=>{$scope.$apply(()=>{$scope.Flag.isAddingProp = data;});});
+    $scope.$on('mouserOverMap.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isOverMap = data;});});
+    $scope.$on('hasSelected.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.hasSelected = data;});});
+    $scope.$on('hasModified.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.hasModified = data;});});
+    $scope.$on('isEditingVector.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isEditingVector = data;});});
+    $scope.$on('isEditingProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isEditingProp = data;});});
+    $scope.$on('isShowRecord.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isShowRecord = data;});});
+    $scope.$on('isAddingProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isAddingProp = data;});});
+    $scope.$on('currentProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.currentProps = data});});
 
     /*编辑GIS数据——图形*/
-    $scope.editGis = function(){
+    $scope.editGis = ()=>{
         /*移除鼠标移动事件监听*/
         mapService.removeListenMouse();
         mapService.addSelectAndModifyEvent();
@@ -56,8 +76,14 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         $scope.Flag.isEditingVector = true;
       };
     $scope.cancleEdit = ()=>{
-        $scope.Flag.isEditingVector = false;
-    }
+        mapService.removeSelectAndModifyEvent();
+    };
+    $scope.removeProps = ()=>{
+        mapService.removeProps($scope.currentProps.k);
+    };
+    $scope.updateProps = ()=>{
+        mapService.updateProps($scope.currentProps);
+    };
 }
 
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];

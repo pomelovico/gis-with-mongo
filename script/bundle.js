@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "42fedf419bfe362299ff"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "775054fb4d7153c8c52d"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -595,7 +595,7 @@
 	
 	var _directives = __webpack_require__(12);
 	
-	var _templates = __webpack_require__(15);
+	var _templates = __webpack_require__(17);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -669,6 +669,8 @@
 	
 	/*指令*/
 	app.directive('myConfirmDel', _directives.directives.myConfirmDel);
+	app.directive('myEditPropsGroup', _directives.directives.myEditPropsGroup);
+	app.directive('myEditProps', _directives.directives.myEditProps);
 	app.directive('mySelectBtn', _directives.directives.mySelectBtn);
 	
 	/*控制器*/
@@ -1857,6 +1859,24 @@
 	        hasSelected: false, /*是否有选中的特征*/
 	        isOverMap: false
 	    };
+	    /*提示信息*/
+	    $scope.alertInfo = '';
+	    /*当前特征属性*/
+	    $scope.currentProps = {
+	        k: '',
+	        v: ''
+	    };
+	
+	    $scope.$safeApply = function (fn) {
+	        var phase = this.$root.$$phase;
+	        if (phase == '$apply' || phase == '$digest') {
+	            if (fn && typeof fn === 'function') {
+	                fn();
+	            }
+	        } else {
+	            this.$apply(fn);
+	        }
+	    };
 	    gisData.fecthGis($routeParams.id);
 	    /*监听来自service的广播事件*/
 	    $scope.$on('gisDetailData.updated', function (e, data) {
@@ -1867,43 +1887,49 @@
 	        }
 	    });
 	    $scope.$on('featureProps.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        // data.status == 'inpo'
+	        $scope.$safeApply(function () {
 	            $scope.featureProps = data;
 	        });
 	    });
 	    $scope.$on('mouserOverMap.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.isOverMap = data;
 	        });
 	    });
 	    $scope.$on('hasSelected.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.hasSelected = data;
 	        });
 	    });
 	    $scope.$on('hasModified.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.hasModified = data;
 	        });
 	    });
 	    $scope.$on('isEditingVector.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.isEditingVector = data;
 	        });
 	    });
 	    $scope.$on('isEditingProp.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.isEditingProp = data;
 	        });
 	    });
 	    $scope.$on('isShowRecord.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.isShowRecord = data;
 	        });
 	    });
 	    $scope.$on('isAddingProp.updated', function (e, data) {
-	        $scope.$apply(function () {
+	        $scope.$safeApply(function () {
 	            $scope.Flag.isAddingProp = data;
+	        });
+	    });
+	    $scope.$on('currentProp.updated', function (e, data) {
+	        $scope.$safeApply(function () {
+	            $scope.currentProps = data;
 	        });
 	    });
 	
@@ -1916,7 +1942,13 @@
 	        $scope.Flag.isEditingVector = true;
 	    };
 	    $scope.cancleEdit = function () {
-	        $scope.Flag.isEditingVector = false;
+	        mapService.removeSelectAndModifyEvent();
+	    };
+	    $scope.removeProps = function () {
+	        mapService.removeProps($scope.currentProps.k);
+	    };
+	    $scope.updateProps = function () {
+	        mapService.updateProps($scope.currentProps);
 	    };
 	}
 	
@@ -2051,6 +2083,9 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
 	/**
 	 * Created by LikoLu on 2016/5/3.
 	 */
@@ -2210,6 +2245,34 @@
 	        interaction['modify'] = modify;
 	        map.addInteraction(modify);
 	    };
+	    this.removeSelectAndModifyEvent = function () {
+	        /*添加鼠标滑动事件监听*/
+	        map.on('pointermove', pointermoveListener);
+	        /*移除select和modify*/
+	        $rootScope.$broadcast('isEditingVector.updated', false);
+	        $rootScope.$broadcast('hasSelected.updated', false);
+	        $rootScope.$broadcast('hasModified.updated', false);
+	        map.removeInteraction(interaction.modify);
+	        map.removeInteraction(interaction.select);
+	        vectorLayer.getSource().getFeatures().map(function (item) {
+	            item.setStyle();
+	        });
+	    };
+	    this.removeProps = function (key) {
+	        var features = interaction.select.getFeatures();
+	        features.item(0).unset(key);
+	        var t = features.item(0).getProperties();
+	        delete t.geometry;
+	        $rootScope.$broadcast('featureProps.updated', t);
+	        $rootScope.$broadcast('props.removed');
+	    };
+	    this.updateProps = function (props) {
+	        var features = interaction.select.getFeatures();
+	        features.item(0).setProperties(_defineProperty({}, props.k, props.v));
+	        var t = features.item(0).getProperties();
+	        delete t.geometry;
+	        $rootScope.$broadcast('featureProps.updated', t);
+	    };
 	}
 	mapService.$inject = ['$rootScope'];
 	exports.default = mapService;
@@ -2221,15 +2284,23 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	exports.directives = undefined;
 	
-	var _myConfirmDel = __webpack_require__(13);
+	var _myEditPropsGroup = __webpack_require__(13);
+	
+	var _myEditPropsGroup2 = _interopRequireDefault(_myEditPropsGroup);
+	
+	var _myEditProps = __webpack_require__(14);
+	
+	var _myEditProps2 = _interopRequireDefault(_myEditProps);
+	
+	var _myConfirmDel = __webpack_require__(15);
 	
 	var _myConfirmDel2 = _interopRequireDefault(_myConfirmDel);
 	
-	var _mySelectBtn = __webpack_require__(14);
+	var _mySelectBtn = __webpack_require__(16);
 	
 	var _mySelectBtn2 = _interopRequireDefault(_mySelectBtn);
 	
@@ -2239,12 +2310,98 @@
 	 * Created by LikoLu on 2016/4/25.
 	 */
 	var directives = exports.directives = {
-	  myConfirmDel: _myConfirmDel2.default,
-	  mySelectBtn: _mySelectBtn2.default
+	    myEditProps: _myEditProps2.default,
+	    myEditPropsGroup: _myEditPropsGroup2.default,
+	    myConfirmDel: _myConfirmDel2.default,
+	    mySelectBtn: _mySelectBtn2.default
 	};
 
 /***/ },
 /* 13 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	/**
+	 * Created by LikoLu on 2016/5/4.
+	 */
+	
+	function myEditPropsGroup(gisData, $timeout, $rootScope) {
+	    return {
+	        restrict: "EA",
+	        scope: {
+	            key: '@key',
+	            val: '@val',
+	            info: '=alertinfo'
+	        },
+	        template: "<span href='' class='icon-edit edit-item ' ng-click='editProp()'></span> " + "<span href='' class='icon-trash delete edit-item' ng-click='confirmDeleteProps()' ></span>",
+	        link: function link(scope, element, attrs) {
+	            scope.editProp = function () {
+	                // console.log(scope);
+	                scope.$emit('currentProp.updated', { k: scope.key, v: scope.val });
+	                scope.$emit('isEditingProp.updated', true);
+	                scope.$emit('isAddingProp.updated', false);
+	            };
+	            scope.confirmDeleteProps = function () {
+	                scope.info = '确认移除此属性？';
+	                angular.element('#removePropModal').modal('show');
+	                scope.$emit('currentProp.updated', { k: scope.key, v: scope.val });
+	            };
+	            scope.$on('props.removed', function () {
+	                $timeout(function () {
+	                    angular.element('#removePropModal').modal('hide');
+	                    scope.$emit('currentProp.updated', { k: '', v: '' });
+	                }, 100);
+	            });
+	        },
+	        transclude: true
+	    };
+	}
+	myEditPropsGroup.$inject = ['gisData', '$timeout', '$rootScope'];
+	exports.default = myEditPropsGroup;
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	/**
+	 * Created by LikoLu on 2016/5/4.
+	 */
+	function myEditProps() {
+	    return {
+	        restrict: "AE",
+	        scope: {
+	            type: '=type',
+	            update: '&updateProps'
+	        },
+	        link: function link(scope, element, attrs) {
+	            element.on('click', function () {
+	                switch (attrs.type) {
+	                    case 'ok':
+	                        scope.update();
+	                        break;
+	                    case 'cancle':
+	                        break;
+	                }
+	                scope.$emit('isEditingProp.updated', false);
+	                scope.$emit('isAddingProp.updated', false);
+	            });
+	        },
+	        transclude: true
+	    };
+	}
+	exports.default = myEditProps;
+
+/***/ },
+/* 15 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2296,7 +2453,7 @@
 	exports.default = myConfirmDel;
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2332,7 +2489,7 @@
 	exports.default = mySelectBtn;
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2344,35 +2501,35 @@
 	 * Created by LikoLu on 2016/4/26.
 	 */
 	var tmpls = exports.tmpls = {
-	    gisdata: __webpack_require__(16),
-	    user: __webpack_require__(17),
-	    upload: __webpack_require__(18),
-	    gisDetail: __webpack_require__(19)
+	    gisdata: __webpack_require__(18),
+	    user: __webpack_require__(19),
+	    upload: __webpack_require__(20),
+	    gisDetail: __webpack_require__(21)
 	};
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='#gisDetail/{{item.id}}'style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <my-confirm-del id={{item.id}} info=\"$parent.alertInfo\" curid=\"$parent.gisID\">\r\n                    </my-confirm-del>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n\r\n<!--Modal-->\r\n<div class=\"modal fade\" id=\"confirmModal\" tabindex=\"-1\" role=\"dialog\"\r\n     aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-header\">\r\n                <button type=\"button\" class=\"close\"\r\n                        data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                    &times;\r\n                </button>\r\n                <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                    提示\r\n                </h4>\r\n            </div>\r\n            <div class=\"modal-body\">\r\n              <span  ng-bind=\"alertInfo\">\r\n              </span>\r\n            </div>\r\n            <div class=\"modal-footer\">\r\n                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteGisData()\"\r\n                >确定\r\n                </button>\r\n                <button type=\"button\" class=\"btn btn-default\"\r\n                        data-dismiss=\"modal\">取消\r\n                </button>\r\n            </div>\r\n        </div><!-- /.modal-content -->\r\n    </div><!-- /.modal -->\r\n</div>\r\n";
-
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"row\" >\r\n    <div class=\"content\">\r\n        个人信息\r\n    </div>\r\n</div>";
 
 /***/ },
 /* 18 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"row\">\r\n    <div class=\"content\">\r\n        <form action=\"interface/upload.php\" method=\"post\" enctype=\"multipart/form-data\">\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传GeoJSON</label><br>\r\n                <my-select-btn filetype=\"geo\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.json文件</span>\r\n                    <input name='geo' id=\"geo\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传Shapefile</label><br>\r\n                <my-select-btn filetype=\"shp\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.shp文件</span>\r\n                    <input name='shp' id=\"shp\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n                <br>\r\n                <my-select-btn filetype=\"dbf\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.dbf文件</span>\r\n                    <input name='dbf' id=\"dbf\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n\r\n            <button class=\"btn btn-success btn-block\" type=\"submit\">\r\n              <span class=\"glyphicon glyphicon-open\">\r\n              </span><span>&nbsp;&nbsp;上传</span>\r\n            </button>\r\n        </form>\r\n    </div>\r\n</div>";
+	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='#gisDetail/{{item.id}}'style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <my-confirm-del id={{item.id}} info=\"$parent.alertInfo\" curid=\"$parent.gisID\">\r\n                    </my-confirm-del>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n\r\n<!--Modal-->\r\n<div class=\"modal fade\" id=\"confirmModal\" tabindex=\"-1\" role=\"dialog\"\r\n     aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-header\">\r\n                <button type=\"button\" class=\"close\"\r\n                        data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                    &times;\r\n                </button>\r\n                <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                    提示\r\n                </h4>\r\n            </div>\r\n            <div class=\"modal-body\">\r\n              <span  ng-bind=\"alertInfo\">\r\n              </span>\r\n            </div>\r\n            <div class=\"modal-footer\">\r\n                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteGisData()\"\r\n                >确定\r\n                </button>\r\n                <button type=\"button\" class=\"btn btn-default\"\r\n                        data-dismiss=\"modal\">取消\r\n                </button>\r\n            </div>\r\n        </div><!-- /.modal-content -->\r\n    </div><!-- /.modal -->\r\n</div>\r\n";
 
 /***/ },
 /* 19 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"row\">\r\n    <div class=\"map-area col-sm-7\">\r\n        <div id=\"map\">\r\n            <div class=\"ol-popup\" ng-show=\"Flag.isOverMap\">\r\n                <p id='title' class='tc'>特征属性</p>\r\n                <div class=\"popup-content\">\r\n                    <table class='f12'>\r\n                        <tr ng-repeat=\"(x,y) in featureProps\">\r\n                            <th class='tr'>\r\n                                <span ng-bind='x'></span>：\r\n                            </th>\r\n                            <td>\r\n                                <span >{{y}}</span>\r\n                            </td>\r\n                        </tr>\r\n                    </table>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- popupOverlayer -->\r\n\r\n    <div class=\"col-sm-5\" id=\"sider-bar\" >\r\n        <div class=\"row\" >\r\n            <div class=\"col-sm-9\" style=\"height:520px;overflow: hidden;overflow-y: auto\" >\r\n                <div class=\"panel panel-body\">\r\n                    <table class=\"table\">\r\n                        <caption class='tc'>\r\n                            <span class='f18 c666'>gis数据记录信息</span>&nbsp;&nbsp;\r\n                  <span\r\n                          style='cursor:pointer;color:#51A6E8'\r\n                          ng-class=\"{true:'icon-chevron-up',false:'icon-chevron-down'}[Flag.isShowRecord]\"\r\n                          ng-click='Flag.isShowRecord = !Flag.isShowRecord'></span>\r\n                        </caption>\r\n                        <tbody ng-show='Flag.isShowRecord'>\r\n                        <tr ng-repeat=\"(x,y) in record\">\r\n                            <th ng-bind='recordMap[x]'></th>\r\n                            <td ng-bind='y'></td>\r\n                        </tr>\r\n                        </tbody>\r\n                    </table>\r\n                </div>\r\n                <div class='panel panel-body' ng-show='Flag.isEditingVector' ng-cloak>\r\n                    当前选中特征属性：\r\n                    <p ng-show='!Flag.hasSelected'>当前未选中特征</p>\r\n                    <div ng-show='Flag.hasSelected'>\r\n                        <table class='table'>\r\n                            <tr class='f14'>\r\n                                <th style=\"width: 25%\">属性</th>\r\n                                <td style=\"width: 47%\">值</td>\r\n                                <td style=\"width: 28%\">操作</td>\r\n                            </tr>\r\n                            <tr ng-repeat=\"(x,y) in featureProps\">\r\n                                <th>\r\n                                    <span ng-bind='x' ></span>\r\n                                </th>\r\n                                <td>\r\n                                    <span >{{y}}</span>\r\n                                </td>\r\n                                <td class='edit-group'>\r\n                                    <span href=\"\" ng-class=\"{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]\" ng-click=\"editProp('edit', x, y)\"></span>\r\n                                    <span href=\"\" class=\"icon-trash delete edit-item\" ng-click=\"editProp('showConfirmModal', x, y)\" ></span>\r\n                                </td>\r\n                            </tr>\r\n                        </table>\r\n                        <hr>\r\n                        <!-- 正在编辑属性 -->\r\n                        <div ng-show='Flag.isEditingProp'>\r\n                            <div class=\"row\">\r\n                                <div class=\"col-sm-6\">\r\n                                    属性：<input type=\"text\" placeholder='属性值' ng--model='propName' ng-readonly='!Flag.isAddingProp'>\r\n                                    <span class=\"icon-ok edit-btn\" ng-click=\"editProp('save')\"></span>\r\n                                </div>\r\n                                <div class=\"col-sm-6\">\r\n                                    值：<input type=\"text\" placeholder='属性值' ng--model='propValue'>\r\n                                    <span class=\"icon-remove edit-btn\" ng-click=\"editProp('cancle')\"></span>\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                        <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>\r\n                            <button\r\n                                    title='添加属性'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click='editProp(\"add\")'>\r\n                                <span class=\"icon-plus\"></span>\r\n                            </button>\r\n                            <button\r\n                                    title='保存修改'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click=\"saveGis('save')\">\r\n                                <span class=\"icon-save\"></span>\r\n                            </button>\r\n                            <button\r\n                                    title='删除特征'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click=\"saveGis('delete_confirm')\">\r\n                                <span class=\"icon-trash\"></span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"col-sm-3 \">\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"toggleTilelayer()\"\r\n                    >\r\n                        <span ng-show='!Flag.isOpenTile'>开启</span>\r\n                        <span ng-show='Flag.isOpenTile'>关闭</span>\r\n                        Tile层</button>\r\n                </p>\r\n                <hr>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"editGis()\"\r\n                            ng-show='!Flag.isEditingVector'\r\n                    >编辑特征</button>\r\n                </p>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"cancleEdit()\"\r\n                            ng-show='Flag.isEditingVector'\r\n                    >退出编辑</button>\r\n                </p>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- 模态框 -->\r\n    <div ng-include=\"'tmpl/removePropModal.html'\" ></div>\r\n    <div ng-include=\"'tmpl/deleteGisModal.html'\" ></div>\r\n</div>";
+	module.exports = "<div class=\"row\" >\r\n    <div class=\"content\">\r\n        个人信息\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"content\">\r\n        <form action=\"interface/upload.php\" method=\"post\" enctype=\"multipart/form-data\">\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传GeoJSON</label><br>\r\n                <my-select-btn filetype=\"geo\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.json文件</span>\r\n                    <input name='geo' id=\"geo\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传Shapefile</label><br>\r\n                <my-select-btn filetype=\"shp\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.shp文件</span>\r\n                    <input name='shp' id=\"shp\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n                <br>\r\n                <my-select-btn filetype=\"dbf\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.dbf文件</span>\r\n                    <input name='dbf' id=\"dbf\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n\r\n            <button class=\"btn btn-success btn-block\" type=\"submit\">\r\n              <span class=\"glyphicon glyphicon-open\">\r\n              </span><span>&nbsp;&nbsp;上传</span>\r\n            </button>\r\n        </form>\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"map-area col-sm-7\">\r\n        <div id=\"map\">\r\n            <div class=\"ol-popup\" ng-show=\"Flag.isOverMap\">\r\n                <p id='title' class='tc'>特征属性</p>\r\n                <div class=\"popup-content\">\r\n                    <table class='f12'>\r\n                        <tr ng-repeat=\"(x,y) in featureProps\">\r\n                            <th class='tr'>\r\n                                <span ng-bind='x'></span>：\r\n                            </th>\r\n                            <td>\r\n                                <span >{{y}}</span>\r\n                            </td>\r\n                        </tr>\r\n                    </table>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- popupOverlayer -->\r\n\r\n    <div class=\"col-sm-5\" id=\"sider-bar\" >\r\n        <div class=\"row\" >\r\n            <div class=\"col-sm-9\" style=\"height:520px;overflow: hidden;overflow-y: auto\" >\r\n                <div class=\"panel panel-body\">\r\n                    <table class=\"table\">\r\n                        <caption class='tc'>\r\n                            <span class='f18 c666'>gis数据记录信息</span>&nbsp;&nbsp;\r\n                  <span\r\n                          style='cursor:pointer;color:#51A6E8'\r\n                          ng-class=\"{true:'icon-chevron-up',false:'icon-chevron-down'}[Flag.isShowRecord]\"\r\n                          ng-click='Flag.isShowRecord = !Flag.isShowRecord'></span>\r\n                        </caption>\r\n                        <tbody ng-show='Flag.isShowRecord'>\r\n                        <tr ng-repeat=\"(x,y) in record\">\r\n                            <th ng-bind='recordMap[x]'></th>\r\n                            <td ng-bind='y'></td>\r\n                        </tr>\r\n                        </tbody>\r\n                    </table>\r\n                </div>\r\n                <div class='panel panel-body' ng-show='Flag.isEditingVector' ng-cloak>\r\n                    当前选中特征属性：\r\n                    <p ng-show='!Flag.hasSelected'>当前未选中特征</p>\r\n                    <div ng-show='Flag.hasSelected'>\r\n                        <table class='table'>\r\n                            <tr class='f14'>\r\n                                <th style=\"width: 25%\">属性</th>\r\n                                <td style=\"width: 47%\">值</td>\r\n                                <td style=\"width: 28%\">操作</td>\r\n                            </tr>\r\n                            <tr ng-repeat=\"(x,y) in featureProps\">\r\n                                <th>\r\n                                    <span ng-bind='x' ></span>\r\n                                </th>\r\n                                <td>\r\n                                    <span >{{y}}</span>\r\n                                </td>\r\n                                <td class='edit-group'>\r\n                                <my-edit-props-group key={{x}} val={{y}} alertinfo=\"$parent.alertInfo\" >\r\n                                </my-edit-props-group >\r\n                                    <!-- <span href=\"\" ng-class=\"{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]\" ng-click=\"editProp('edit', x, y)\"></span>\r\n                                    <span href=\"\" class=\"icon-trash delete edit-item\" ng-click=\"editProp('showConfirmModal', x, y)\" ></span> -->\r\n                                </td>\r\n                            </tr>\r\n                        </table>\r\n                        <hr>\r\n                        <!-- 正在编辑属性 -->\r\n                        <div ng-show='Flag.isEditingProp'>\r\n                            <div class=\"row\">\r\n                                <div class=\"col-sm-6\">\r\n                                    属性：<input type=\"text\" placeholder='属性值' ng-model='currentProps.k' ng-readonly='!Flag.isAddingProp'>\r\n                                    <my-edit-props class='icon-ok edit-btn' type='ok' update-props=\"updateProps()\"></my-edit-props>\r\n                                </div>\r\n                                <div class=\"col-sm-6\">\r\n                                    值：<input type=\"text\" placeholder='属性值' ng-model='currentProps.v'>\r\n                                    <my-edit-props class='icon-remove edit-btn' type='cancle'></my-edit-props>\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                        <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>\r\n                            <button\r\n                                    title='添加属性'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click='editProp(\"add\")'>\r\n                                <span class=\"icon-plus\"></span>\r\n                            </button>\r\n                            <button\r\n                                    title='保存修改'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click=\"saveGis('save')\">\r\n                                <span class=\"icon-save\"></span>\r\n                            </button>\r\n                            <button\r\n                                    title='删除特征'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    ng-click=\"saveGis('delete_confirm')\">\r\n                                <span class=\"icon-trash\"></span>\r\n                            </button>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"col-sm-3 \">\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"toggleTilelayer()\"\r\n                    >\r\n                        <span ng-show='!Flag.isOpenTile'>开启</span>\r\n                        <span ng-show='Flag.isOpenTile'>关闭</span>\r\n                        Tile层</button>\r\n                </p>\r\n                <hr>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"editGis()\"\r\n                            ng-show='!Flag.isEditingVector'\r\n                    >编辑特征</button>\r\n                </p>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"cancleEdit()\"\r\n                            ng-show='Flag.isEditingVector'\r\n                    >退出编辑</button>\r\n                </p>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- 模态框 -->\r\n    <div class=\"modal fade\" id=\"removePropModal\" tabindex=\"-1\" role=\"dialog\"\r\n         aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n        <div class=\"modal-dialog\">\r\n            <div class=\"modal-content\">\r\n                <div class=\"modal-header\">\r\n                    <button type=\"button\" class=\"close\"\r\n                            data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                        &times;\r\n                    </button>\r\n                    <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                        提示\r\n                    </h4>\r\n                </div>\r\n                <div class=\"modal-body\" ng-bind=\"alertInfo\">\r\n\r\n                </div>\r\n                <div class=\"modal-footer\">\r\n                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"removeProps()\"\r\n                    >确定\r\n                    </button>\r\n                    <button type=\"button\" class=\"btn btn-default\"\r\n                            data-dismiss=\"modal\">取消\r\n                    </button>\r\n                </div>\r\n            </div><!-- /.modal-content -->\r\n        </div><!-- /.modal -->\r\n    </div>\r\n    <!--<div ng-include=\"'tmpl/removePropModal.html'\" ></div>-->\r\n    <div ng-include=\"'tmpl/deleteGisModal.html'\" ></div>\r\n</div>";
 
 /***/ }
 /******/ ]);
