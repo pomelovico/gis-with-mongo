@@ -32,17 +32,26 @@ function mapService($rootScope){
         })
     });
     var selectedStyle = new ol.style.Style({
-              fill:new ol.style.Fill({
-                color:"rgba(255,255,255,0.5)"
-              }),
-              stroke:new ol.style.Stroke({
-                color:"#0BA6FF",
-                width:1
-              }),
-              text: new ol.style.Text({
-                color:'#333'
-              })
-            });
+        fill:new ol.style.Fill({
+            color:"rgba(255,255,255,0.5)"
+          }),
+        stroke:new ol.style.Stroke({
+            color:"#0BA6FF",
+            width:1
+        }),
+        text: new ol.style.Text({
+            color:'#333'
+        })
+    });
+    var delectedStyle = new ol.style.Style({
+      fill:new ol.style.Fill({
+        color:"rgba(255,255,255,0)"
+      }),
+      stroke:new ol.style.Stroke({
+        color:"rgba(255,255,255,0)",
+        width:0
+      })
+    })
     /*视图*/
     var defaultView = new ol.View({
         projection: 'EPSG:4326',
@@ -122,7 +131,6 @@ function mapService($rootScope){
         /*注册选择事件*/
         select.on('select',function(feature){
           /*是否有选中的特征*/
-          // console.log($scope.Flag.hasSelected);
             if(feature['selected'].length<1){
                 $rootScope.$broadcast('hasSelected.updated',false);
             }
@@ -140,7 +148,6 @@ function mapService($rootScope){
             }
             feature['deselected'].map(function(item,index){
                 item.setStyle();
-                // setDefaultState();
             });
         });
         interaction['select'] = select;
@@ -210,8 +217,9 @@ function mapService($rootScope){
         return curerntFeatureID;
     };
     this.deleteFeature = ()=>{
-        console.log(curerntFeatureID);
         vectorLayer.getSource().removeFeature(vectorSource.getFeatureById(curerntFeatureID));
+        var feature = interaction.select.getFeatures();
+        feature.item(0).setStyle(delectedStyle);
         curerntFeatureID = -1;
     }
 }

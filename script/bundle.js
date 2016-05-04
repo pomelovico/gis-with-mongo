@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "fcb9dab042aaa6311fcd"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "8b9710159c617ef12470"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -1867,6 +1867,7 @@
 	        k: '',
 	        v: ''
 	    };
+	    $scope.currentState = '';
 	
 	    $scope.$safeApply = function (fn) {
 	        var phase = this.$root.$$phase;
@@ -1934,7 +1935,8 @@
 	    });
 	    $scope.$on('alertInfo.updated', function (e, data) {
 	        $scope.$safeApply(function () {
-	            $scope.alertInfo = data;
+	            $scope.alertInfo = data.info;
+	            $scope.currentState = data.state;
 	        });
 	    });
 	
@@ -1953,7 +1955,7 @@
 	    $scope.cancleEdit = function () {
 	        mapService.removeSelectAndModifyEvent();
 	    };
-	    $scope.removeProps = function () {
+	    var removeProps = function removeProps() {
 	        mapService.removeProps($scope.currentProps.k);
 	    };
 	    $scope.updateProps = function () {
@@ -1971,7 +1973,7 @@
 	        };
 	        gisData.saveFeature(postData);
 	    };
-	    $scope.deleteFeature = function () {
+	    var deleteFeature = function deleteFeature() {
 	        console.log('delete');
 	        var postData = {
 	            coll_name: $routeParams.id,
@@ -1979,6 +1981,14 @@
 	            data: JSON.stringify({ id: mapService.getIdOfFeatureToDelete() })
 	        };
 	        gisData.deleteFeature(postData);
+	    };
+	    $scope.confirmSubmit = function () {
+	        switch ($scope.currentState) {
+	            case 'toRemove':
+	                removeProps();break;
+	            case 'toDelete':
+	                deleteFeature();break;
+	        }
 	    };
 	}
 	
@@ -2187,6 +2197,15 @@
 	            color: '#333'
 	        })
 	    });
+	    var delectedStyle = new ol.style.Style({
+	        fill: new ol.style.Fill({
+	            color: "rgba(255,255,255,0)"
+	        }),
+	        stroke: new ol.style.Stroke({
+	            color: "rgba(255,255,255,0)",
+	            width: 0
+	        })
+	    });
 	    /*视图*/
 	    var defaultView = new ol.View({
 	        projection: 'EPSG:4326',
@@ -2265,7 +2284,6 @@
 	        /*注册选择事件*/
 	        select.on('select', function (feature) {
 	            /*是否有选中的特征*/
-	            // console.log($scope.Flag.hasSelected);
 	            if (feature['selected'].length < 1) {
 	                $rootScope.$broadcast('hasSelected.updated', false);
 	            } else {
@@ -2282,7 +2300,6 @@
 	            }
 	            feature['deselected'].map(function (item, index) {
 	                item.setStyle();
-	                // setDefaultState();
 	            });
 	        });
 	        interaction['select'] = select;
@@ -2349,8 +2366,9 @@
 	        return curerntFeatureID;
 	    };
 	    this.deleteFeature = function () {
-	        console.log(curerntFeatureID);
 	        vectorLayer.getSource().removeFeature(vectorSource.getFeatureById(curerntFeatureID));
+	        var feature = interaction.select.getFeatures();
+	        feature.item(0).setStyle(delectedStyle);
 	        curerntFeatureID = -1;
 	    };
 	}
@@ -2429,7 +2447,10 @@
 	                scope.$emit('isAddingProp.updated', false);
 	            };
 	            scope.confirmDeleteProps = function () {
-	                scope.$emit('alertInfo.updated', '确认移除此属性？');
+	                scope.$emit('alertInfo.updated', {
+	                    info: '确认移除此属性？',
+	                    state: 'toRemove'
+	                });
 	                angular.element('#removePropModal').modal('show');
 	                scope.$emit('currentProp.updated', { k: scope.key, v: scope.val });
 	            };
@@ -2466,32 +2487,45 @@
 	        },
 	        template: "<div ng-click='saveGis()'> <span ng-transclude ></span>  </div>",
 	        link: function link(scope, element, attrs) {
+	            var modalID = '#removePropModal';
 	            element.on('click', function () {
 	                switch (attrs.type) {
 	                    case 'addProp':
 	                        scope.$emit('isEditingProp.updated', true);
 	                        scope.$emit('isAddingProp.updated', true);
+	                        scope.$emit('currentProp.updated', { k: '', v: '' });
 	                        break;
 	                    case 'saveFeature':
 	                        scope.featureMethod();break;
 	                    case 'deleteFeature':
-	                        scope.$emit('alertInfo.updated', '确定删除此特征？');
+	                        scope.$emit('alertInfo.updated', {
+	                            info: '确定删除此特征？',
+	                            state: 'toDelete'
+	                        });
 	                        angular.element('#removePropModal').modal('show');
 	                        break;
 	                }
 	            });
 	            scope.$on('feature.saved', function () {
-	                scope.$emit('alertInfo.updated', '保存成功！');
-	                angular.element('#removePropModal').modal('show');
+	                scope.$emit('alertInfo.updated', {
+	                    info: '保存成功！',
+	                    state: 'saved'
+	                });
+	                angular.element(modalID).modal('show');
 	                $timeout(function () {
-	                    angular.element('#removePropModal').modal('hide');
+	                    angular.element(modalID).modal('hide');
 	                }, 1000);
 	            });
 	            scope.$on('feature.deleted', function () {
-	                scope.$emit('alertInfo.updated', '删除成功！');
-	                angular.element('#removePropModal').modal('show');
+	                scope.$emit('alertInfo.updated', {
+	                    info: '删除成功！',
+	                    state: 'deleted'
+	                });
+	                scope.$emit('featureProps.updated', {});
+	                scope.$emit('hasSelected.updated', false);
+	                angular.element(modalID).modal('show');
 	                $timeout(function () {
-	                    angular.element('#removePropModal').modal('hide');
+	                    angular.element(modalID).modal('hide');
 	                }, 1000);
 	            });
 	        },
@@ -2671,7 +2705,7 @@
 /* 22 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"row\">\r\n    <div class=\"map-area col-sm-7\">\r\n        <div id=\"map\">\r\n            <div class=\"ol-popup\" ng-show=\"Flag.isOverMap\">\r\n                <p id='title' class='tc'>特征属性</p>\r\n                <div class=\"popup-content\">\r\n                    <table class='f12'>\r\n                        <tr ng-repeat=\"(x,y) in featureProps\">\r\n                            <th class='tr'>\r\n                                <span ng-bind='x'></span>：\r\n                            </th>\r\n                            <td>\r\n                                <span >{{y}}</span>\r\n                            </td>\r\n                        </tr>\r\n                    </table>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- popupOverlayer -->\r\n\r\n    <div class=\"col-sm-5\" id=\"sider-bar\" >\r\n        <div class=\"row\" >\r\n            <div class=\"col-sm-9\" style=\"height:520px;overflow: hidden;overflow-y: auto\" >\r\n                <div class=\"panel panel-body\">\r\n                    <table class=\"table\">\r\n                        <caption class='tc'>\r\n                            <span class='f18 c666'>gis数据记录信息</span>&nbsp;&nbsp;\r\n                  <span\r\n                          style='cursor:pointer;color:#51A6E8'\r\n                          ng-class=\"{true:'icon-chevron-up',false:'icon-chevron-down'}[Flag.isShowRecord]\"\r\n                          ng-click='Flag.isShowRecord = !Flag.isShowRecord'></span>\r\n                        </caption>\r\n                        <tbody ng-show='Flag.isShowRecord'>\r\n                        <tr ng-repeat=\"(x,y) in record\">\r\n                            <th ng-bind='recordMap[x]'></th>\r\n                            <td ng-bind='y'></td>\r\n                        </tr>\r\n                        </tbody>\r\n                    </table>\r\n                </div>\r\n                <div class='panel panel-body' ng-show='Flag.isEditingVector' ng-cloak>\r\n                    当前选中特征属性：\r\n                    <p ng-show='!Flag.hasSelected'>当前未选中特征</p>\r\n                    <div ng-show='Flag.hasSelected'>\r\n                        <table class='table'>\r\n                            <tr class='f14'>\r\n                                <th style=\"width: 25%\">属性</th>\r\n                                <td style=\"width: 47%\">值</td>\r\n                                <td style=\"width: 28%\">操作</td>\r\n                            </tr>\r\n                            <tr ng-repeat=\"(x,y) in featureProps\">\r\n                                <th>\r\n                                    <span ng-bind='x' ></span>\r\n                                </th>\r\n                                <td>\r\n                                    <span >{{y}}</span>\r\n                                </td>\r\n                                <td class='edit-group'>\r\n                                <my-edit-props-group key={{x}} val={{y}} alertinfo=\"$parent.alertInfo\" >\r\n                                </my-edit-props-group >\r\n                                    <!-- <span href=\"\" ng-class=\"{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]\" ng-click=\"editProp('edit', x, y)\"></span>\r\n                                    <span href=\"\" class=\"icon-trash delete edit-item\" ng-click=\"editProp('showConfirmModal', x, y)\" ></span> -->\r\n                                </td>\r\n                            </tr>\r\n                        </table>\r\n                        <hr>\r\n                        <!-- 正在编辑属性 -->\r\n                        <div ng-show='Flag.isEditingProp'>\r\n                            <div class=\"row\">\r\n                                <div class=\"col-sm-6\">\r\n                                    属性：<input type=\"text\" placeholder='属性值' ng-model='currentProps.k' ng-readonly='!Flag.isAddingProp'>\r\n                                    <my-edit-props class='icon-ok edit-btn' type='ok' update-props=\"updateProps()\"></my-edit-props>\r\n                                </div>\r\n                                <div class=\"col-sm-6\">\r\n                                    值：<input type=\"text\" placeholder='属性值' ng-model='currentProps.v'>\r\n                                    <my-edit-props class='icon-remove edit-btn' type='cancle'></my-edit-props>\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                        <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>\r\n<!--                             <button\r\n        ng-click='editProp(\"add\")'>\r\n    <span class=\"icon-plus\"></span>\r\n</button> -->\r\n                            <my-edit-feature \r\n                                    title='添加属性'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='addProp'\r\n                                    >\r\n                                    <span class='icon-plus'></span>\r\n                            </my-edit-feature>\r\n                            <my-edit-feature \r\n                                    title='保存修改'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='saveFeature'\r\n                                    method=\"saveFeature()\"\r\n                                    >\r\n                                    <span class='icon-save'></span>\r\n                            </my-edit-feature>\r\n                            <my-edit-feature \r\n                                    title='删除特征'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='deleteFeature'\r\n                                    method=\"deleteFeature()\"\r\n                                    >\r\n                                    <span class='icon-trash'></span>\r\n                            </my-edit-feature>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"col-sm-3 \">\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"toggleTilelayer()\"\r\n                    >\r\n                        <span ng-show='!Flag.isOpenTile'>开启</span>\r\n                        <span ng-show='Flag.isOpenTile'>关闭</span>\r\n                        Tile层</button>\r\n                </p>\r\n                <hr>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"editGis()\"\r\n                            ng-show='!Flag.isEditingVector'\r\n                    >编辑特征</button>\r\n                </p>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"cancleEdit()\"\r\n                            ng-show='Flag.isEditingVector'\r\n                    >退出编辑</button>\r\n                </p>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- 模态框 -->\r\n    <div class=\"modal fade\" id=\"removePropModal\" tabindex=\"-1\" role=\"dialog\"\r\n         aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n        <div class=\"modal-dialog\">\r\n            <div class=\"modal-content\">\r\n                <div class=\"modal-header\">\r\n                    <button type=\"button\" class=\"close\"\r\n                            data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                        &times;\r\n                    </button>\r\n                    <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                        提示\r\n                    </h4>\r\n                </div>\r\n                <div class=\"modal-body\" ng-bind=\"alertInfo\">\r\n\r\n                </div>\r\n                <div class=\"modal-footer\">\r\n                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"removeProps()\"\r\n                    >确定\r\n                    </button>\r\n                    <button type=\"button\" class=\"btn btn-default\"\r\n                            data-dismiss=\"modal\">取消\r\n                    </button>\r\n                </div>\r\n            </div><!-- /.modal-content -->\r\n        </div><!-- /.modal -->\r\n    </div>\r\n    <!--<div ng-include=\"'tmpl/removePropModal.html'\" ></div>-->\r\n    <div ng-include=\"'tmpl/deleteGisModal.html'\" ></div>\r\n</div>";
+	module.exports = "<div class=\"row\">\r\n    <div class=\"map-area col-sm-7\">\r\n        <div id=\"map\">\r\n            <div class=\"ol-popup\" ng-show=\"Flag.isOverMap\">\r\n                <p id='title' class='tc'>特征属性</p>\r\n                <div class=\"popup-content\">\r\n                    <table class='f12'>\r\n                        <tr ng-repeat=\"(x,y) in featureProps\">\r\n                            <th class='tr'>\r\n                                <span ng-bind='x'></span>：\r\n                            </th>\r\n                            <td>\r\n                                <span >{{y}}</span>\r\n                            </td>\r\n                        </tr>\r\n                    </table>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- popupOverlayer -->\r\n\r\n    <div class=\"col-sm-5\" id=\"sider-bar\" >\r\n        <div class=\"row\" >\r\n            <div class=\"col-sm-9\" style=\"height:520px;overflow: hidden;overflow-y: auto\" >\r\n                <div class=\"panel panel-body\">\r\n                    <table class=\"table\">\r\n                        <caption class='tc'>\r\n                            <span class='f18 c666'>gis数据记录信息</span>&nbsp;&nbsp;\r\n                  <span\r\n                          style='cursor:pointer;color:#51A6E8'\r\n                          ng-class=\"{true:'icon-chevron-up',false:'icon-chevron-down'}[Flag.isShowRecord]\"\r\n                          ng-click='Flag.isShowRecord = !Flag.isShowRecord'></span>\r\n                        </caption>\r\n                        <tbody ng-show='Flag.isShowRecord'>\r\n                        <tr ng-repeat=\"(x,y) in record\">\r\n                            <th ng-bind='recordMap[x]'></th>\r\n                            <td ng-bind='y'></td>\r\n                        </tr>\r\n                        </tbody>\r\n                    </table>\r\n                </div>\r\n                <div class='panel panel-body' ng-show='Flag.isEditingVector' ng-cloak>\r\n                    当前选中特征属性：\r\n                    <p ng-show='!Flag.hasSelected'>当前未选中特征</p>\r\n                    <div ng-show='Flag.hasSelected'>\r\n                        <table class='table'>\r\n                            <tr class='f14'>\r\n                                <th style=\"width: 25%\">属性</th>\r\n                                <td style=\"width: 47%\">值</td>\r\n                                <td style=\"width: 28%\">操作</td>\r\n                            </tr>\r\n                            <tr ng-repeat=\"(x,y) in featureProps\">\r\n                                <th>\r\n                                    <span ng-bind='x' ></span>\r\n                                </th>\r\n                                <td>\r\n                                    <span >{{y}}</span>\r\n                                </td>\r\n                                <td class='edit-group'>\r\n                                <my-edit-props-group key={{x}} val={{y}} alertinfo=\"$parent.alertInfo\" >\r\n                                </my-edit-props-group >\r\n                                    <!-- <span href=\"\" ng-class=\"{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]\" ng-click=\"editProp('edit', x, y)\"></span>\r\n                                    <span href=\"\" class=\"icon-trash delete edit-item\" ng-click=\"editProp('showConfirmModal', x, y)\" ></span> -->\r\n                                </td>\r\n                            </tr>\r\n                        </table>\r\n                        <hr>\r\n                        <!-- 正在编辑属性 -->\r\n                        <div ng-show='Flag.isEditingProp'>\r\n                            <div class=\"row\">\r\n                                <div class=\"col-sm-6\">\r\n                                    属性：<input type=\"text\" placeholder='属性值' ng-model='currentProps.k' ng-readonly='!Flag.isAddingProp'>\r\n                                    <my-edit-props class='icon-ok edit-btn' type='ok' update-props=\"updateProps()\"></my-edit-props>\r\n                                </div>\r\n                                <div class=\"col-sm-6\">\r\n                                    值：<input type=\"text\" placeholder='属性值' ng-model='currentProps.v'>\r\n                                    <my-edit-props class='icon-remove edit-btn' type='cancle'></my-edit-props>\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                        <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>\r\n<!--                             <button\r\n        ng-click='editProp(\"add\")'>\r\n    <span class=\"icon-plus\"></span>\r\n</button> -->\r\n                            <my-edit-feature \r\n                                    title='添加属性'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='addProp'\r\n                                    >\r\n                                    <span class='icon-plus'></span>\r\n                            </my-edit-feature>\r\n                            <my-edit-feature \r\n                                    title='保存修改'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='saveFeature'\r\n                                    method=\"saveFeature()\"\r\n                                    >\r\n                                    <span class='icon-save'></span>\r\n                            </my-edit-feature>\r\n                            <my-edit-feature \r\n                                    title='删除特征'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='deleteFeature'\r\n                                    method=\"deleteFeature()\"\r\n                                    >\r\n                                    <span class='icon-trash'></span>\r\n                            </my-edit-feature>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"col-sm-3 \">\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"toggleTilelayer()\"\r\n                    >\r\n                        <span ng-show='!Flag.isOpenTile'>开启</span>\r\n                        <span ng-show='Flag.isOpenTile'>关闭</span>\r\n                        Tile层</button>\r\n                </p>\r\n                <hr>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"editGis()\"\r\n                            ng-show='!Flag.isEditingVector'\r\n                    >编辑特征</button>\r\n                </p>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"cancleEdit()\"\r\n                            ng-show='Flag.isEditingVector'\r\n                    >退出编辑</button>\r\n                </p>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- 模态框 -->\r\n    <div class=\"modal fade\" id=\"removePropModal\" tabindex=\"-1\" role=\"dialog\"\r\n         aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n        <div class=\"modal-dialog\">\r\n            <div class=\"modal-content\">\r\n                <div class=\"modal-header\">\r\n                    <button type=\"button\" class=\"close\"\r\n                            data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                        &times;\r\n                    </button>\r\n                    <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                        提示\r\n                    </h4>\r\n                </div>\r\n                <div class=\"modal-body\" ng-bind=\"alertInfo\">\r\n                </div>\r\n                <div class=\"modal-footer\">\r\n                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"confirmSubmit()\"\r\n                    >确定\r\n                    </button>\r\n                    <button type=\"button\" class=\"btn btn-default\"\r\n                            data-dismiss=\"modal\">取消\r\n                    </button>\r\n                </div>\r\n            </div><!-- /.modal-content -->\r\n        </div><!-- /.modal -->\r\n    </div>\r\n    <!--<div ng-include=\"'tmpl/removePropModal.html'\" ></div>-->\r\n    <div ng-include=\"'tmpl/deleteGisModal.html'\" ></div>\r\n</div>";
 
 /***/ }
 /******/ ]);

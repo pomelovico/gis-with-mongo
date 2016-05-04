@@ -20,7 +20,10 @@ function myEditPropsGroup(gisData,$timeout,$rootScope){
 
             };
             scope.confirmDeleteProps = ()=>{
-                scope.$emit('alertInfo.updated','确认移除此属性？');
+                scope.$emit('alertInfo.updated',{
+                    info:'确认移除此属性？',
+                    state:'toRemove'
+                });
                 angular.element('#removePropModal').modal('show');
                 scope.$emit('currentProp.updated',{k:scope.key,v:scope.val});
             };

@@ -32,6 +32,7 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         k:'',
         v:''
     };
+    $scope.currentState = '';
 
     $scope.$safeApply = function(fn) {
          var phase = this.$root.$$phase;
@@ -61,7 +62,12 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
     $scope.$on('isShowRecord.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isShowRecord = data;});});
     $scope.$on('isAddingProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.Flag.isAddingProp = data;});});
     $scope.$on('currentProp.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.currentProps = data});});
-    $scope.$on('alertInfo.updated',(e,data)=>{$scope.$safeApply(()=>{$scope.alertInfo = data});});
+    $scope.$on('alertInfo.updated',(e,data)=>{
+        $scope.$safeApply(()=>{
+            $scope.alertInfo = data.info;
+            $scope.currentState = data.state;
+        });
+    });
 
     $scope.$on('feature.deleted',()=>{
         mapService.deleteFeature();
@@ -78,7 +84,7 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
     $scope.cancleEdit = ()=>{
         mapService.removeSelectAndModifyEvent();
     };
-    $scope.removeProps = ()=>{
+    let removeProps = ()=>{
         mapService.removeProps($scope.currentProps.k);
     };
     $scope.updateProps = ()=>{
@@ -96,7 +102,7 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         };
         gisData.saveFeature(postData);
     };
-    $scope.deleteFeature = ()=>{
+    let deleteFeature = ()=>{
         console.log('delete');
         let postData = {
             coll_name:$routeParams.id,
@@ -105,6 +111,12 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         };
         gisData.deleteFeature(postData);
     }
+    $scope.confirmSubmit = ()=>{
+        switch($scope.currentState){
+            case 'toRemove':removeProps();break;
+            case 'toDelete':deleteFeature();break;
+        }
+    };
 }
 
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
