@@ -21,8 +21,8 @@ function gisData($http, $rootScope,$location){
 
     /*主页gis数据记录*/
     this.getGisData = ()=>{
-        return Object.assign({},GisRecords);
-    };
+        return GisRecords;
+    }; 
     this.deleteGisData = id =>{
         $rootScope.$broadcast('gisdata.isdeleting');
         $http.post(
@@ -59,7 +59,7 @@ function gisData($http, $rootScope,$location){
             .error((data)=>{console.log(data)});
     };
     this.getDetailGis = id=>{
-        return Object.assign({},DetailGisData);
+        return DetailGisData;
     }
     this.saveFeature = postData=>{
         $http.post(

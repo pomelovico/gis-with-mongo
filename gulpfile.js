@@ -25,9 +25,14 @@ gulp.task('live',function(){
 });
 gulp.task('public',function(){
     var jsFilter = filter(['**/*.js','!**/.config.js'],{restore:true});
-    return gulp.src('./index-backup.html')
+    var cssFilter = filter(['**/*.css'],{restore:true});
+    gulp.src('./css/fonts/*').pipe(gulp.dest('./public/css/fonts'));
+    gulp.src('./css/font-awesome/font/*').pipe(gulp.dest('./public/font'));
+    gulp.src('./index.html')
         .pipe(useref())
         .pipe(jsFilter)
         .pipe(jsFilter.restore)
-        .pipe(gulp.dest('./build'))
+        .pipe(cssFilter)
+        .pipe(cssFilter.restore)
+        .pipe(gulp.dest('./public'))
 });

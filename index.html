@@ -5,48 +5,16 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta http-equiv="X-UA-Compatible" main="chrome=1">
-    <link rel="stylesheet" type="text/css" href="css/ol.css">
-    <link  rel='stylesheet' type="text/css" href="css/bootstrap.min.css">
-    <link  rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css" />
-    <link  rel='stylesheet' type="text/css" href="css/common.css">
-    <link  rel='stylesheet' type="text/css" href="css/main.css">
-    <style type="text/css">
-    .header-bar{
-      height:75px;
-      background-color: #fff;
-    }
-    .main{
-      margin-top: 25px;
-    }
-    .main .container{
-      background-color: #fff;
-    }
-    .main .content{
-      padding:5px 15px 20px 15px;
-    }
-    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
-      vertical-align: middle;
-    }
-    .table>thead>tr>td{
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-    .dropdown-menu{
-      min-width:0; 
-    }
-    ._menu{
-      display: inline-block;
-      vertical-align: middle;
-    }
-    ._menu:before{
-      content:'';
-      display: inline-block;
-      width: 0px;
-      height: 100%;
-      vertical-align: middle;
-    }
-    </style>
-    <title>上传GIS数据</title>
+    <!-- build:css css/vendor.css -->
+    <link rel="stylesheet" type="text/css" href="src/css/ol.css">
+    <link  rel='stylesheet' type="text/css" href="src/css/bootstrap.min.css">
+    <link  rel="stylesheet" type="text/css" href="src/css/font-awesome/css/font-awesome.min.css" />
+    <!-- endbuild-->
+      <!-- build:css css/main.css -->
+    <link  rel='stylesheet' type="text/css" href="src/css/common.css">
+    <link  rel='stylesheet' type="text/css" href="src/css/main.css">
+    <!-- endbuild-->
+    <title>GIS数据管理系统</title>
   </head>
   <body ng-app="App">
   <div class="header-bar">
@@ -86,13 +54,13 @@
       <div ng-view></div>
     </div>
   </div>
-      <!-- build:js /js/vendor.js -->
+      <!-- build:js js/vendor.js -->
   <script src='script/jquery-1.12.2.min.js'></script>
   <script src='script/bootstrap.min.js'></script>
   <script src='script/angular.min.js'></script>
   <script src='script/ol-3.12.js'></script>
       <!-- endbuild-->
-      <!-- build:js /js/bundle.js -->
+      <!-- build:js js/bundle.js -->
   <script src='script/bundle.js'></script>
       <!-- endbuild -->
   </body>

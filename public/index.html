@@ -5,46 +5,9 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta http-equiv="X-UA-Compatible" main="chrome=1">
-    <link  rel='stylesheet' type="text/css" href="css/bootstrap.min.css">
-    <link  rel='stylesheet' type="text/css" href="css/common.css">
-    <link  rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css" />
-    <style type="text/css">
-    .header-bar{
-      height:75px;
-      background-color: #fff;
-    }
-    .main{
-      margin-top: 25px;
-    }
-    .main .container{
-      background-color: #fff;
-    }
-    .main .content{
-      padding:5px 15px 20px 15px;
-    }
-    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
-      vertical-align: middle;
-    }
-    .table>thead>tr>td{
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-    .dropdown-menu{
-      min-width:0; 
-    }
-    ._menu{
-      display: inline-block;
-      vertical-align: middle;
-    }
-    ._menu:before{
-      content:'';
-      display: inline-block;
-      width: 0px;
-      height: 100%;
-      vertical-align: middle;
-    }
-    </style>
-    <title>上传GIS数据</title>
+    <link rel="stylesheet" href="css/vendor.css">
+      <link rel="stylesheet" href="css/main.css">
+    <title>GIS数据管理系统</title>
   </head>
   <body ng-app="App">
   <div class="header-bar">
@@ -84,39 +47,7 @@
       <div ng-view></div>
     </div>
   </div>
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" 
-   aria-labelledby="myModalLabel" aria-hidden="true">
-     <div class="modal-dialog">
-        <div class="modal-content">
-           <div class="modal-header">
-              <button type="button" class="close" 
-                 data-dismiss="modal" aria-hidden="true">
-                    &times;
-              </button>
-              <h4 class="modal-title" id="myModalLabel">
-                 删除提醒
-              </h4>
-           </div>
-           <div class="modal-body">
-              <span id='delete-info'>
-                确认删除此项数据？
-              </span>
-           </div>
-           <div class="modal-footer">
-              <button type="button" class="btn btn-primary" id='delete-btn'
-                 >确定
-              </button>
-              <button type="button" class="btn btn-default" 
-                 data-dismiss="modal">取消
-              </button>
-           </div>
-        </div><!-- /.modal-content -->
-  </div><!-- /.modal -->
-
-
-  <script src='js/lib/jquery-1.12.2.min.js'></script>
-  <script src='js/lib/bootstrap.min.js'></script>
-  <script src='js/lib/angular.min.js'></script>
-  <script src='js/bundle.js'></script>
+      <script src="js/vendor.js"></script>
+      <script src="js/bundle.js"></script>
   </body>
 </html>

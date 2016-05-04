@@ -20,7 +20,7 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         isEditingProp:false,/*正在编辑属性*/
         isShowRecord:false, /*显示gis记录信息*/
         isAddingProp:false, /*正在添加属性*/
-        isOpenTile:true, /*是否开启Tile层*/
+        isOpenTile:false, /*是否开启Tile层*/
         hasModified:false, /*是否有修改*/
         hasSelected:false, /*是否有选中的特征*/
         isOverMap:false
@@ -118,6 +118,5 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         mapService.toggleTilelayer($scope.Flag.isOpenTile);
     }
 }
-
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
 export  default gisDetailCtrl;

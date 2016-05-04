@@ -4,10 +4,10 @@
 // import angular from 'angular';
 import angularRouter from 'angular-route';
 
-import {controllers} from './controllers';
-import {services} from './services';
-import {directives} from './directives';
-import {tmpls} from './templates';
+import {controllers} from './js/controllers';
+import {services} from './js/services';
+import {directives} from './js/directives';
+import {tmpls} from './js/templates';
 
 var app = angular.module('App',[angularRouter],['$httpProvider',function($httpProvider) {
     /*重写angularjs的post请求模块*/

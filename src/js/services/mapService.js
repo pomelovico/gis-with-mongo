@@ -11,7 +11,7 @@ function mapService($rootScope){
     /*Tile预渲染层*/
     var tileLayer = new ol.layer.Tile({
         source: new ol.source.OSM(),
-        visible:true,
+        visible:false,
         preload:0
     });
 
