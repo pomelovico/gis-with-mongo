@@ -163,7 +163,7 @@ if($geo['size'] > 0){
 <body>
 <div class="wrapper">
 	<p id='info'><?php echo $info; ?></p>
-	<a id='back-btn' href="../index-backup.html">返回</a>
+	<a id='back-btn' href="../backup/index-backup.html">返回</a>
 </div>
 </body>
 </html>
