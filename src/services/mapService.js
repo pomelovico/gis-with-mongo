@@ -104,7 +104,7 @@ function mapService($rootScope){
         });
         map = new ol.Map({
             layers: [
-                // tileLayer,
+                tileLayer,
                 vectorLayer
             ],
             target: 'map',
@@ -222,6 +222,9 @@ function mapService($rootScope){
         feature.item(0).setStyle(delectedStyle);
         curerntFeatureID = -1;
     }
+    this.toggleTilelayer = function(flag){
+        tileLayer.setVisible(flag);
+    };
 }
 mapService.$inject = ['$rootScope'];
 export default mapService;

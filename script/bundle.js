@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "8b9710159c617ef12470"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "7e0bd395236b52c1a429"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -1880,6 +1880,7 @@
 	        }
 	    };
 	    gisData.fecthGis($routeParams.id);
+	
 	    /*监听来自service的广播事件*/
 	    $scope.$on('gisDetailData.updated', function (e, data) {
 	        if (data.status == 0) {
@@ -1939,11 +1940,10 @@
 	            $scope.currentState = data.state;
 	        });
 	    });
-	
 	    $scope.$on('feature.deleted', function () {
 	        mapService.deleteFeature();
-	        // $scope.$safeApply(()=>{$scope.featureProps = {};});
 	    });
+	
 	    /*编辑GIS数据——图形*/
 	    $scope.editGis = function () {
 	        /*移除鼠标移动事件监听*/
@@ -1955,15 +1955,9 @@
 	    $scope.cancleEdit = function () {
 	        mapService.removeSelectAndModifyEvent();
 	    };
-	    var removeProps = function removeProps() {
-	        mapService.removeProps($scope.currentProps.k);
-	    };
 	    $scope.updateProps = function () {
 	        mapService.updateProps($scope.currentProps);
 	    };
-	    /*    $scope.addPropToFeature = ()=>{
-	            // mapService.updateProps($scope.currentProps);
-	        };*/
 	    $scope.saveFeature = function () {
 	        console.log('save');
 	        var postData = {
@@ -1972,6 +1966,10 @@
 	            data: mapService.getFeatureToSave()
 	        };
 	        gisData.saveFeature(postData);
+	    };
+	
+	    var removeProps = function removeProps() {
+	        mapService.removeProps($scope.currentProps.k);
 	    };
 	    var deleteFeature = function deleteFeature() {
 	        console.log('delete');
@@ -1989,6 +1987,10 @@
 	            case 'toDelete':
 	                deleteFeature();break;
 	        }
+	    };
+	    $scope.toggleTilelayer = function () {
+	        $scope.Flag.isOpenTile = !$scope.Flag.isOpenTile;
+	        mapService.toggleTilelayer($scope.Flag.isOpenTile);
 	    };
 	}
 	
@@ -2257,9 +2259,7 @@
 	            }
 	        });
 	        map = new ol.Map({
-	            layers: [
-	            // tileLayer,
-	            vectorLayer],
+	            layers: [tileLayer, vectorLayer],
 	            target: 'map',
 	            view: defaultView
 	        });
@@ -2370,6 +2370,9 @@
 	        var feature = interaction.select.getFeatures();
 	        feature.item(0).setStyle(delectedStyle);
 	        curerntFeatureID = -1;
+	    };
+	    this.toggleTilelayer = function (flag) {
+	        tileLayer.setVisible(flag);
 	    };
 	}
 	mapService.$inject = ['$rootScope'];

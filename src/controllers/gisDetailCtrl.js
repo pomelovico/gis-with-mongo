@@ -45,6 +45,7 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         }
     };
     gisData.fecthGis($routeParams.id);
+
     /*监听来自service的广播事件*/
     $scope.$on('gisDetailData.updated',(e,data)=>{
         if(data.status == 0){
@@ -68,11 +69,8 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
             $scope.currentState = data.state;
         });
     });
+    $scope.$on('feature.deleted',()=>{mapService.deleteFeature();});
 
-    $scope.$on('feature.deleted',()=>{
-        mapService.deleteFeature();
-        // $scope.$safeApply(()=>{$scope.featureProps = {};});
-    });
     /*编辑GIS数据——图形*/
     $scope.editGis = ()=>{
         /*移除鼠标移动事件监听*/
@@ -84,15 +82,9 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
     $scope.cancleEdit = ()=>{
         mapService.removeSelectAndModifyEvent();
     };
-    let removeProps = ()=>{
-        mapService.removeProps($scope.currentProps.k);
-    };
     $scope.updateProps = ()=>{
         mapService.updateProps($scope.currentProps);
     };
-/*    $scope.addPropToFeature = ()=>{
-        // mapService.updateProps($scope.currentProps);
-    };*/
     $scope.saveFeature = ()=>{
         console.log('save');
         let postData = {
@@ -102,6 +94,10 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         };
         gisData.saveFeature(postData);
     };
+
+    let removeProps = ()=>{
+        mapService.removeProps($scope.currentProps.k);
+    };
     let deleteFeature = ()=>{
         console.log('delete');
         let postData = {
@@ -110,13 +106,17 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
             data:JSON.stringify({id : mapService.getIdOfFeatureToDelete()})
         };
         gisData.deleteFeature(postData);
-    }
+    };
     $scope.confirmSubmit = ()=>{
         switch($scope.currentState){
             case 'toRemove':removeProps();break;
             case 'toDelete':deleteFeature();break;
         }
     };
+    $scope.toggleTilelayer = ()=>{
+        $scope.Flag.isOpenTile = !$scope.Flag.isOpenTile;
+        mapService.toggleTilelayer($scope.Flag.isOpenTile);
+    }
 }
 
 gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
