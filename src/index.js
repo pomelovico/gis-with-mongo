@@ -78,6 +78,7 @@ app.service('mapService',services.mapService);
 /*指令*/
 app.directive('myConfirmDel',directives.myConfirmDel);
 app.directive('myEditPropsGroup',directives.myEditPropsGroup);
+app.directive('myEditFeature',directives.myEditFeatureGroup);
 app.directive('myEditProps',directives.myEditProps);
 app.directive('mySelectBtn',directives.mySelectBtn);
 

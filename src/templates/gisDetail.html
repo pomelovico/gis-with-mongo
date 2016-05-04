@@ -80,27 +80,49 @@
                             </div>
                         </div>
                         <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>
-                            <button
+<!--                             <button
+        ng-click='editProp("add")'>
+    <span class="icon-plus"></span>
+</button> -->
+                            <my-edit-feature 
                                     title='添加属性'
                                     class="btn btn-default"
                                     style='color:#AFAFAF'
-                                    ng-click='editProp("add")'>
-                                <span class="icon-plus"></span>
-                            </button>
-                            <button
+                                    type='addProp'
+                                    >
+                                    <span class='icon-plus'></span>
+                            </my-edit-feature>
+                            <my-edit-feature 
                                     title='保存修改'
                                     class="btn btn-default"
                                     style='color:#AFAFAF'
-                                    ng-click="saveGis('save')">
-                                <span class="icon-save"></span>
-                            </button>
-                            <button
+                                    type='saveFeature'
+                                    >
+                                    <span class='icon-save'></span>
+                            </my-edit-feature>
+                            <my-edit-feature 
                                     title='删除特征'
                                     class="btn btn-default"
                                     style='color:#AFAFAF'
-                                    ng-click="saveGis('delete_confirm')">
-                                <span class="icon-trash"></span>
-                            </button>
+                                    type='deleteFeature'
+                                    >
+                                    <span class='icon-trash'></span>
+                            </my-edit-feature>
+
+<!--                             <button
+        title='保存修改'
+        class="btn btn-default"
+        style='color:#AFAFAF'
+        ng-click="saveGis('save')">
+    <span class="icon-save"></span>
+</button>
+<button
+        title='删除特征'
+        class="btn btn-default"
+        style='color:#AFAFAF'
+        ng-click="saveGis('delete_confirm')">
+    <span class="icon-trash"></span>
+</button> -->
                         </div>
                     </div>
                 </div>
