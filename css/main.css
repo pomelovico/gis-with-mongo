@@ -83,7 +83,7 @@
         cursor: pointer;
       }
       input[type=text]{
-        max-width: 110px;
+        max-width: 105px;
         border-radius: 4px;
         outline: none;
         border: 1px solid #ccc;
