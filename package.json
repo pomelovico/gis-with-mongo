@@ -31,10 +31,12 @@
     "gulp-babel": "^6.1.2",
     "gulp-filter": "^4.0.0",
     "gulp-livereload": "^3.8.1",
+    "gulp-uglify": "^1.5.3",
     "gulp-useref": "^3.1.0",
     "gulp-webpack": "^1.5.0",
     "html-loader": "^0.4.3",
     "style-loader": "^0.13.1",
+    "uglify": "^0.1.5",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1"
   }

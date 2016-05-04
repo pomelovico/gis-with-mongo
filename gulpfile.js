@@ -7,10 +7,18 @@ var webpack = require('gulp-webpack');
 var livereload = require('gulp-livereload');
 var filter = require('gulp-filter');
 var useref = require('gulp-useref');
+var uglify = require('gulp-uglify');
 
 gulp.task('webpack',function(){
     return gulp.src('./src/index.js')
         .pipe(webpack(require('./webpack.config.js')))
+        .pipe(gulp.dest('./script'))
+        .pipe(livereload())
+});
+gulp.task('webpack:p',function(){
+    return gulp.src('./src/index.js')
+        .pipe(webpack(require('./webpack.public.config.js')))
+        .pipe(uglify())
         .pipe(gulp.dest('./script'))
         .pipe(livereload())
 });
