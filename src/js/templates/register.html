@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="content col-sm-4 col-sm-offset-4">
+        <form action="#" >
+            <div class="form-group ">
+                <label class="col-sm-3 control-label">邮箱</label>
+                <input type="text" ng-model="reg_user_acount" />
+            </div>
+            <div class="form-group ">
+                <label class="col-sm-3 control-label">用户名</label>
+                <input type="text" ng-model="reg_user_name"/>
+            </div>
+            <div class="form-group ">
+                <label class="col-sm-3 control-label">密码</label>
+                <input type="password" ng-model="reg_user_pwd"/>
+            </div>
+            <div class="form-group ">
+                <label class="col-sm-3 control-label">确认密码</label>
+                <input type="password" ng-model="reg_user_pwd_r"/>
+            </div>
+            <button class="btn btn-block btn-success" type="button" ng-click="regist()">
+                <i class="icon-circle-arrow-right"></i>
+            </button>
+        </form>
+        <a href="#user/login">已有账号，去登录</a>
+    </div>
+</div>

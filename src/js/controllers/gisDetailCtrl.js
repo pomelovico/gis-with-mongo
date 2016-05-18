@@ -1,7 +1,8 @@
 /**
  * Created by LikoLu on 2016/5/3.
  */
-function gisDetailCtrl($scope,gisData,mapService,$routeParams){
+function gisDetailCtrl($scope,gisData,mapService,userService,$routeParams){
+    userService.checkUser();
     let GISDATA = {};
     let MAP = {};
     $scope.xx= 'liko';
@@ -118,5 +119,5 @@ function gisDetailCtrl($scope,gisData,mapService,$routeParams){
         mapService.toggleTilelayer($scope.Flag.isOpenTile);
     }
 }
-gisDetailCtrl.$inject = ['$scope','gisData','mapService','$routeParams'];
+gisDetailCtrl.$inject = ['$scope','gisData','mapService','userService','$routeParams'];
 export  default gisDetailCtrl;

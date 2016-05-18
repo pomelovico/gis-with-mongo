@@ -16,35 +16,42 @@
     <!-- endbuild-->
     <title>GIS数据管理系统</title>
   </head>
-  <body ng-app="App">
+  <body ng-app="App" ng-controller="mainCtrl">
   <div class="header-bar">
     <div class="container">
       <div class="row" style='text-align:right'>
         <h2 class='pull-left'>GIS数据管理系统</h2>
-        <div class="_menu">
-          <div class="dropdown ">
-            <button class="btn  dropdown-toggle" id="dropdownMenu1" type="button" data-toggle="dropdown">
-              <span class="glyphicon glyphicon-th"></span>
-            </button>
-            <ul class="dropdown-menu pull-right" role="menu">
-              <li role="presentation">
-                <a href="#gisdata" role="menuitem" tabindex="-1" class='change-view' data-view='gisdata'>
-                <i class="icon-cloud"></i>&nbsp;&nbsp;GIS数据
-                </a>
-              </li>
-              <li role="presentation">
-                <a href="#upload" role="menuitem" tabindex="-1" class='change-view' data-view='upload'>
-                <i class="icon-cloud-upload"></i>&nbsp;&nbsp;上传文件
-                </a>
-              </li>
-              <li role="presentation">
-                <a href="#user" role="menuitem" tabindex="-1" class='change-view' data-view='personinfo'>
-                <i class=" icon-user"></i> &nbsp;&nbsp;个人信息
-                </a>
-              </li>
-            </ul>
-          </div>
+        <h2 class='pull-right'>
+            <span>
+                Hello, {{user}}
+            </span>
+            <div class="_menu">
+            <div class="dropdown ">
+                <button class="btn  dropdown-toggle" id="dropdownMenu1" type="button" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-th"></span>
+                </button>
+                <ul class="dropdown-menu pull-right" role="menu">
+                    <li role="presentation">
+                        <a href="#gisdata" role="menuitem" tabindex="-1" class='change-view' data-view='gisdata'>
+                            <i class="icon-cloud"></i>&nbsp;&nbsp;GIS数据
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#upload" role="menuitem" tabindex="-1" class='change-view' data-view='upload'>
+                            <i class="icon-cloud-upload"></i>&nbsp;&nbsp;上传文件
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#user" role="menuitem" tabindex="-1" class='change-view' data-view='personinfo'>
+                            <i class=" icon-user"></i> &nbsp;&nbsp;个人信息
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
+        </h2>
+
+
       </div>
     </div>
   </div>

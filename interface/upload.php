@@ -168,8 +168,10 @@ class GisData{
     }
 	/*插入特征集合到数据库中*/
     public function insertDataToDB($gisFile){
-        $user_name = 'pomelo';
-        $user_id = '1';
+        /*$user_name = 'pomelo';
+        $user_id = '1';*/
+        $user_name = $_POST['user_name'];
+        $user_id = $_POST['user_id'];
 
         try{
             $db = $this->connectDB();

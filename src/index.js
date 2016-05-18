@@ -70,10 +70,20 @@ app.config(function($routeProvider){
             template : tmpls.gisDetail,
             controller : 'gisDetailCtrl'
         })
+        .when('/user/register',{
+            template : tmpls.register,
+            controller : 'userCtrl'
+        })
+        .when('/user/login',{
+            template : tmpls.login,
+            controller : 'userCtrl'
+        })
 });
+
 /*注入服务*/
 app.service('gisData',services.gisData);
 app.service('mapService',services.mapService);
+app.service('userService',services.userService);
 
 
 /*指令*/
@@ -87,6 +97,7 @@ app.directive('mySelectBtn',directives.mySelectBtn);
 /*控制器*/
 app.controller('gisDataCtrl',controllers.gisDataCtrl);
 app.controller('userCtrl',controllers.userCtrl);
+app.controller('mainCtrl',controllers.mainCtrl);
 app.controller('uploadCtrl',controllers.uploadCtrl);
 app.controller('gisDetailCtrl',controllers.gisDetailCtrl);
 

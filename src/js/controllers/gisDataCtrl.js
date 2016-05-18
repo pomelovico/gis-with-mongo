@@ -2,19 +2,24 @@
  * Created by LikoLu on 2016/4/21.
  */
 
-function gisDataCtrl($scope,gisData,$timeout){
+function gisDataCtrl($scope,gisData,userService){
+    userService.checkUser();
+    gisData.fetchGisData(userService.getUserId());
+    
     $scope.alertInfo = '';
-    $scope.gisID = '123';
-    $scope.gisdata = gisData.getGisData();
+    $scope.gisID = '';
+    $scope.gisdata = '';
+    
+    $scope.deleteGisData = ()=>{
+        gisData.deleteGisData($scope.gisID,userService.getUserId());
+    };
     $scope.$on('gisdata.updated',()=>{
         $scope.gisdata = gisData.getGisData();
     });
     $scope.$on('gisdata.deleted',()=>{
         $scope.gisdata = gisData.getGisData();
     });
-    $scope.deleteGisData = ()=>{
-        gisData.deleteGisData($scope.gisID);
-    }
+
 }
-gisDataCtrl.$inject = ['$scope','gisData','$timeout'];
+gisDataCtrl.$inject = ['$scope','gisData','userService'];
 export  default gisDataCtrl;

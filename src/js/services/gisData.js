@@ -7,35 +7,36 @@ import {API} from '../constants/server';
 function gisData($http, $rootScope,$location){
     let GisRecords = [];
     let DetailGisData = {};
-    $http.post(
-        API.getGisData,
-        {
-        user_id:1,
-        type:'all'
-        })
-        .success((data)=>{
-            GisRecords = data.gisdata;
-            $rootScope.$broadcast('gisdata.updated');
-        })
-        .error((data)=>{console.log(data)});
-
+    
+    this.fetchGisData = user_id=>{
+        $http.post(
+            API.getGisData,
+            {
+                user_id:user_id,
+                type:'all'
+            })
+            .success((data)=>{
+                GisRecords = data.gisdata;
+                $rootScope.$broadcast('gisdata.updated');
+            })
+            .error((data)=>{console.log(data)});
+    };
     /*主页gis数据记录*/
     this.getGisData = ()=>{
         return GisRecords;
     }; 
-    this.deleteGisData = id =>{
+    this.deleteGisData = (coll_id,user_id) =>{
         $rootScope.$broadcast('gisdata.isdeleting');
         $http.post(
             API.deleteGisData,
             {
-                user_id:1,
-                coll_name:`data_${id}`
+                user_id:user_id,
+                coll_name:`data_${coll_id}`
             })
             .success((data)=>{
-                console.log('success');
                 let t = [];
                 for (let i in GisRecords){
-                    if(GisRecords[i].id != id){
+                    if(GisRecords[i].id != coll_id){
                         t.push(GisRecords[i]);
                     }
                 }
@@ -67,13 +68,7 @@ function gisData($http, $rootScope,$location){
               postData
           )
           .success(function(data){
-            console.log('success to save');
             $rootScope.$broadcast('feature.saved');
-            /*if(type=='delete'){
-              $('#deleteGis').modal('hide');
-              MAP.layers.vectorLayer.getSource().removeFeature(feature.item(0));
-              setDefaultState('delete-edit-gis');
-            }*/
           })
           .error(function(data){
             console.log('faile to save');
@@ -85,13 +80,7 @@ function gisData($http, $rootScope,$location){
             postData
             )
             .success(function(data){
-                console.log('success to delete');
                 $rootScope.$broadcast('feature.deleted');
-                /*if(type=='delete'){
-                 $('#deleteGis').modal('hide');
-                 MAP.layers.vectorLayer.getSource().removeFeature(feature.item(0));
-                 setDefaultState('delete-edit-gis');
-                 }*/
             })
             .error(function(data){
                 console.log('faile to save');

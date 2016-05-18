@@ -3,6 +3,7 @@
  */
 import  gisDataCtrl from './gisDataCtrl';
 import  userCtrl from './userCtrl';
+import  mainCtrl from './mainCtrl';
 import  uploadCtrl from './uploadCtrl';
 import  gisDetailCtrl from './gisDetailCtrl';
 
@@ -10,6 +11,7 @@ import  gisDetailCtrl from './gisDetailCtrl';
 export  const  controllers = {
     gisDataCtrl,
     userCtrl,
+    mainCtrl,
     uploadCtrl,
     gisDetailCtrl
 };

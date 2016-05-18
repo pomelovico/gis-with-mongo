@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "cafc48cde98d39001807"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "ed4593124f40556f7a07"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -591,11 +591,11 @@
 	
 	var _controllers = __webpack_require__(3);
 	
-	var _services = __webpack_require__(8);
+	var _services = __webpack_require__(9);
 	
-	var _directives = __webpack_require__(12);
+	var _directives = __webpack_require__(14);
 	
-	var _templates = __webpack_require__(18);
+	var _templates = __webpack_require__(20);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -661,11 +661,19 @@
 	    }).when('/gisDetail/:id', {
 	        template: _templates.tmpls.gisDetail,
 	        controller: 'gisDetailCtrl'
+	    }).when('/user/register', {
+	        template: _templates.tmpls.register,
+	        controller: 'userCtrl'
+	    }).when('/user/login', {
+	        template: _templates.tmpls.login,
+	        controller: 'userCtrl'
 	    });
 	});
+	
 	/*注入服务*/
 	app.service('gisData', _services.services.gisData);
 	app.service('mapService', _services.services.mapService);
+	app.service('userService', _services.services.userService);
 	
 	/*指令*/
 	app.directive('myConfirmDel', _directives.directives.myConfirmDel);
@@ -677,6 +685,7 @@
 	/*控制器*/
 	app.controller('gisDataCtrl', _controllers.controllers.gisDataCtrl);
 	app.controller('userCtrl', _controllers.controllers.userCtrl);
+	app.controller('mainCtrl', _controllers.controllers.mainCtrl);
 	app.controller('uploadCtrl', _controllers.controllers.uploadCtrl);
 	app.controller('gisDetailCtrl', _controllers.controllers.gisDetailCtrl);
 
@@ -1738,25 +1747,29 @@
 	
 	var _userCtrl2 = _interopRequireDefault(_userCtrl);
 	
-	var _uploadCtrl = __webpack_require__(6);
+	var _mainCtrl = __webpack_require__(6);
+	
+	var _mainCtrl2 = _interopRequireDefault(_mainCtrl);
+	
+	var _uploadCtrl = __webpack_require__(7);
 	
 	var _uploadCtrl2 = _interopRequireDefault(_uploadCtrl);
 	
-	var _gisDetailCtrl = __webpack_require__(7);
+	var _gisDetailCtrl = __webpack_require__(8);
 	
 	var _gisDetailCtrl2 = _interopRequireDefault(_gisDetailCtrl);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/**
-	 * Created by Vico on 2016.04.24.
-	 */
 	var controllers = exports.controllers = {
 	    gisDataCtrl: _gisDataCtrl2.default,
 	    userCtrl: _userCtrl2.default,
+	    mainCtrl: _mainCtrl2.default,
 	    uploadCtrl: _uploadCtrl2.default,
 	    gisDetailCtrl: _gisDetailCtrl2.default
-	};
+	}; /**
+	    * Created by Vico on 2016.04.24.
+	    */
 
 /***/ },
 /* 4 */
@@ -1771,21 +1784,25 @@
 	 * Created by LikoLu on 2016/4/21.
 	 */
 	
-	function gisDataCtrl($scope, gisData, $timeout) {
+	function gisDataCtrl($scope, gisData, userService) {
+	    userService.checkUser();
+	    gisData.fetchGisData(userService.getUserId());
+	
 	    $scope.alertInfo = '';
-	    $scope.gisID = '123';
-	    $scope.gisdata = gisData.getGisData();
+	    $scope.gisID = '';
+	    $scope.gisdata = '';
+	
+	    $scope.deleteGisData = function () {
+	        gisData.deleteGisData($scope.gisID, userService.getUserId());
+	    };
 	    $scope.$on('gisdata.updated', function () {
 	        $scope.gisdata = gisData.getGisData();
 	    });
 	    $scope.$on('gisdata.deleted', function () {
 	        $scope.gisdata = gisData.getGisData();
 	    });
-	    $scope.deleteGisData = function () {
-	        gisData.deleteGisData($scope.gisID);
-	    };
 	}
-	gisDataCtrl.$inject = ['$scope', 'gisData', '$timeout'];
+	gisDataCtrl.$inject = ['$scope', 'gisData', 'userService'];
 	exports.default = gisDataCtrl;
 
 /***/ },
@@ -1795,15 +1812,52 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	/**
 	 * Created by Vico on 2016.05.02.
 	 */
-	function userCtrl($scope) {
-	  $scope.message = 'User Page';
+	function userCtrl($scope, userService, $location) {
+	    var patten = new RegExp('register');
+	    patten.test($location.$$path) ? null : userService.checkUser();
+	
+	    $scope.login_user_acount = '';
+	    $scope.login_user_pwd = '';
+	
+	    $scope.reg_user_acount = '';
+	    $scope.reg_user_name = '';
+	    $scope.reg_user_pwd = '';
+	    $scope.reg_user_pwd_r = '';
+	
+	    $scope.logout = function () {
+	        userService.logout();
+	    };
+	    $scope.login = function () {
+	        userService.login({
+	            user_acount: $scope.login_user_acount,
+	            user_pwd: $scope.login_user_pwd
+	        });
+	    };
+	    $scope.regist = function () {
+	        if ($scope.reg_user_pwd === $scope.reg_user_pwd_r && $scope.reg_user_name !== '' && $scope.reg_user_acount !== '' && $scope.reg_user_pwd !== '') {
+	            userService.regist({
+	                user_name: $scope.reg_user_name,
+	                user_pwd: $scope.reg_user_pwd,
+	                user_acount: $scope.reg_user_acount
+	            });
+	        }
+	    };
+	    $scope.$on('login.success', function (e, data) {
+	        $location.path('/gisdata');
+	    });
+	    $scope.$on('logout.success', function () {
+	        $location.path('/user/login');
+	    });
+	    $scope.$on('regist.success', function () {
+	        $location.path('/gisdata');
+	    });
 	}
-	userCtrl.$inject = ['$scope'];
+	userCtrl.$inject = ['$scope', 'userService', '$location'];
 	exports.default = userCtrl;
 
 /***/ },
@@ -1816,13 +1870,14 @@
 	  value: true
 	});
 	/**
-	 * Created by Vico on 2016.05.02.
+	 * Created by Vico on 2016.05.18.
 	 */
-	function uploadCtrl($scope) {
-	  $scope.message = 'Upload Page';
+	function mainCtrl($scope, userService) {
+	  userService.checkUser();
+	  $scope.user = userService.getUserName();
 	}
-	uploadCtrl.$inject = ['$scope'];
-	exports.default = uploadCtrl;
+	mainCtrl.$inject = ['$scope', 'userService'];
+	exports.default = mainCtrl;
 
 /***/ },
 /* 7 */
@@ -1834,9 +1889,30 @@
 	    value: true
 	});
 	/**
+	 * Created by Vico on 2016.05.02.
+	 */
+	function uploadCtrl($scope, userService) {
+	    userService.checkUser();
+	    $scope.user_id = userService.getUserId();
+	    $scope.user_name = userService.getUserName();
+	}
+	uploadCtrl.$inject = ['$scope', 'userService'];
+	exports.default = uploadCtrl;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	/**
 	 * Created by LikoLu on 2016/5/3.
 	 */
-	function gisDetailCtrl($scope, gisData, mapService, $routeParams) {
+	function gisDetailCtrl($scope, gisData, mapService, userService, $routeParams) {
+	    userService.checkUser();
 	    var GISDATA = {};
 	    var MAP = {};
 	    $scope.xx = 'liko';
@@ -1993,37 +2069,8 @@
 	        mapService.toggleTilelayer($scope.Flag.isOpenTile);
 	    };
 	}
-	gisDetailCtrl.$inject = ['$scope', 'gisData', 'mapService', '$routeParams'];
+	gisDetailCtrl.$inject = ['$scope', 'gisData', 'mapService', 'userService', '$routeParams'];
 	exports.default = gisDetailCtrl;
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.services = undefined;
-	
-	var _gisData = __webpack_require__(9);
-	
-	var _gisData2 = _interopRequireDefault(_gisData);
-	
-	var _mapService = __webpack_require__(11);
-	
-	var _mapService2 = _interopRequireDefault(_mapService);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/**
-	 * Created by Vico on 2016.04.24.
-	 */
-	var services = exports.services = {
-	  gisData: _gisData2.default,
-	  mapService: _mapService2.default
-	};
 
 /***/ },
 /* 9 */
@@ -2034,36 +2081,70 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.services = undefined;
 	
-	var _server = __webpack_require__(10);
+	var _gisData = __webpack_require__(10);
+	
+	var _gisData2 = _interopRequireDefault(_gisData);
+	
+	var _mapService = __webpack_require__(12);
+	
+	var _mapService2 = _interopRequireDefault(_mapService);
+	
+	var _userService = __webpack_require__(13);
+	
+	var _userService2 = _interopRequireDefault(_userService);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var services = exports.services = {
+	    gisData: _gisData2.default,
+	    mapService: _mapService2.default,
+	    userService: _userService2.default
+	}; /**
+	    * Created by Vico on 2016.04.24.
+	    */
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _server = __webpack_require__(11);
 	
 	function gisData($http, $rootScope, $location) {
 	    var GisRecords = [];
 	    var DetailGisData = {};
-	    $http.post(_server.API.getGisData, {
-	        user_id: 1,
-	        type: 'all'
-	    }).success(function (data) {
-	        GisRecords = data.gisdata;
-	        $rootScope.$broadcast('gisdata.updated');
-	    }).error(function (data) {
-	        console.log(data);
-	    });
 	
+	    this.fetchGisData = function (user_id) {
+	        $http.post(_server.API.getGisData, {
+	            user_id: user_id,
+	            type: 'all'
+	        }).success(function (data) {
+	            GisRecords = data.gisdata;
+	            $rootScope.$broadcast('gisdata.updated');
+	        }).error(function (data) {
+	            console.log(data);
+	        });
+	    };
 	    /*主页gis数据记录*/
 	    this.getGisData = function () {
 	        return GisRecords;
 	    };
-	    this.deleteGisData = function (id) {
+	    this.deleteGisData = function (coll_id, user_id) {
 	        $rootScope.$broadcast('gisdata.isdeleting');
 	        $http.post(_server.API.deleteGisData, {
-	            user_id: 1,
-	            coll_name: 'data_' + id
+	            user_id: user_id,
+	            coll_name: 'data_' + coll_id
 	        }).success(function (data) {
-	            console.log('success');
 	            var t = [];
 	            for (var i in GisRecords) {
-	                if (GisRecords[i].id != id) {
+	                if (GisRecords[i].id != coll_id) {
 	                    t.push(GisRecords[i]);
 	                }
 	            }
@@ -2090,26 +2171,14 @@
 	    };
 	    this.saveFeature = function (postData) {
 	        $http.post(_server.API.editGeoJSON, postData).success(function (data) {
-	            console.log('success to save');
 	            $rootScope.$broadcast('feature.saved');
-	            /*if(type=='delete'){
-	              $('#deleteGis').modal('hide');
-	              MAP.layers.vectorLayer.getSource().removeFeature(feature.item(0));
-	              setDefaultState('delete-edit-gis');
-	            }*/
 	        }).error(function (data) {
 	            console.log('faile to save');
 	        });
 	    };
 	    this.deleteFeature = function (postData) {
 	        $http.post(_server.API.editGeoJSON, postData).success(function (data) {
-	            console.log('success to delete');
 	            $rootScope.$broadcast('feature.deleted');
-	            /*if(type=='delete'){
-	             $('#deleteGis').modal('hide');
-	             MAP.layers.vectorLayer.getSource().removeFeature(feature.item(0));
-	             setDefaultState('delete-edit-gis');
-	             }*/
 	        }).error(function (data) {
 	            console.log('faile to save');
 	        });
@@ -2122,7 +2191,7 @@
 	exports.default = gisData;
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2138,11 +2207,13 @@
 	var API = exports.API = {
 	    getGisData: baseUrl + 'getGisData.php',
 	    editGeoJSON: baseUrl + 'editGeoJSON.php',
-	    deleteGisData: baseUrl + 'deleteGisData.php'
+	    deleteGisData: baseUrl + 'deleteGisData.php',
+	    login: baseUrl + 'login.php',
+	    regist: baseUrl + 'regist.php'
 	};
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2378,7 +2449,105 @@
 	exports.default = mapService;
 
 /***/ },
-/* 12 */
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _server = __webpack_require__(11);
+	
+	function setCookie(name, value) {
+	    var Days = 30;
+	    var exp = new Date();
+	    exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+	    document.cookie = name + "=" + encodeURI(value) + ";expires=" + exp.toGMTString();
+	} /**
+	   * Created by Vico on 2016.05.18.
+	   */
+	
+	function getCookie(name) {
+	    var arr,
+	        reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+	    if (arr = document.cookie.match(reg)) return decodeURI(arr[2]);else return null;
+	}
+	function delCookie(name) {
+	    var exp = new Date();
+	    exp.setTime(exp.getTime() - 1);
+	    var cval = getCookie(name);
+	    if (cval != null) document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+	}
+	
+	function userService($http, $rootScope, $location) {
+	    var USER = {};
+	    this.checkUser = function () {
+	        if (getCookie('user_id')) {
+	            USER.user_id = getCookie('user_id');
+	            USER.user_acount = getCookie('user_acount');
+	            USER.user_name = getCookie('user_name');
+	            USER.user_pwd = getCookie('user_pwd');
+	        } else {
+	            $location.path('/user/login');
+	        }
+	    };
+	    this.login = function (user) {
+	        $http.post(_server.API.login, user).success(function (data) {
+	            if (data.status) {
+	                for (var i in data.user) {
+	                    setCookie(i, data.user[i]);
+	                }
+	                USER = data.user;
+	                console.log(document.cookie);
+	                $rootScope.$broadcast('login.success', data.user);
+	            } else {
+	                $rootScope.$broadcast('login.failed', data.user);
+	            }
+	        }).error(function (data) {
+	            console.log(data);
+	        });
+	    };
+	    this.logout = function () {
+	        for (var i in USER) {
+	            delCookie(i);
+	            $rootScope.$broadcast('logout.success');
+	        }
+	        USER = {};
+	    };
+	    this.regist = function (user) {
+	        $http.post(_server.API.regist, user).success(function (data) {
+	            if (data.status) {
+	                for (var i in data.user) {
+	                    setCookie(i, data.user[i]);
+	                }
+	                USER = data.user;
+	                console.log(document.cookie);
+	                $rootScope.$broadcast('regist.success', data.user);
+	            } else {
+	                $rootScope.$broadcast('regist.failed', data.user);
+	            }
+	        }).error(function (data) {
+	            console.log(data);
+	        });
+	    };
+	    this.getUserId = function () {
+	        return USER.user_id;
+	    };
+	    this.getUserAcount = function () {
+	        return USER.user_acount;
+	    };
+	    this.getUserName = function () {
+	        console.log(USER);
+	        return USER.user_name;
+	    };
+	}
+	userService.$inject = ['$http', '$rootScope', '$location'];
+	exports.default = userService;
+
+/***/ },
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2388,23 +2557,23 @@
 	});
 	exports.directives = undefined;
 	
-	var _myEditPropsGroup = __webpack_require__(13);
+	var _myEditPropsGroup = __webpack_require__(15);
 	
 	var _myEditPropsGroup2 = _interopRequireDefault(_myEditPropsGroup);
 	
-	var _myEditFeatureGroup = __webpack_require__(14);
+	var _myEditFeatureGroup = __webpack_require__(16);
 	
 	var _myEditFeatureGroup2 = _interopRequireDefault(_myEditFeatureGroup);
 	
-	var _myEditProps = __webpack_require__(15);
+	var _myEditProps = __webpack_require__(17);
 	
 	var _myEditProps2 = _interopRequireDefault(_myEditProps);
 	
-	var _myConfirmDel = __webpack_require__(16);
+	var _myConfirmDel = __webpack_require__(18);
 	
 	var _myConfirmDel2 = _interopRequireDefault(_myConfirmDel);
 	
-	var _mySelectBtn = __webpack_require__(17);
+	var _mySelectBtn = __webpack_require__(19);
 	
 	var _mySelectBtn2 = _interopRequireDefault(_mySelectBtn);
 	
@@ -2421,7 +2590,7 @@
 	    */
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2470,7 +2639,7 @@
 	exports.default = myEditPropsGroup;
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2538,7 +2707,7 @@
 	exports.default = myEditFeatureGroup;
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2579,7 +2748,7 @@
 	exports.default = myEditProps;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2631,7 +2800,7 @@
 	exports.default = myConfirmDel;
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2667,7 +2836,7 @@
 	exports.default = mySelectBtn;
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2679,32 +2848,46 @@
 	 * Created by LikoLu on 2016/4/26.
 	 */
 	var tmpls = exports.tmpls = {
-	    gisdata: __webpack_require__(19),
-	    user: __webpack_require__(20),
-	    upload: __webpack_require__(21),
-	    gisDetail: __webpack_require__(22)
+	    gisdata: __webpack_require__(21),
+	    user: __webpack_require__(22),
+	    upload: __webpack_require__(23),
+	    login: __webpack_require__(24),
+	    register: __webpack_require__(25),
+	    gisDetail: __webpack_require__(26)
 	};
-
-/***/ },
-/* 19 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='#gisDetail/{{item.id}}'style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <my-confirm-del id={{item.id}} info=\"$parent.alertInfo\" curid=\"$parent.gisID\">\r\n                    </my-confirm-del>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n\r\n<!--Modal-->\r\n<div class=\"modal fade\" id=\"confirmModal\" tabindex=\"-1\" role=\"dialog\"\r\n     aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-header\">\r\n                <button type=\"button\" class=\"close\"\r\n                        data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                    &times;\r\n                </button>\r\n                <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                    提示\r\n                </h4>\r\n            </div>\r\n            <div class=\"modal-body\">\r\n              <span  ng-bind=\"alertInfo\">\r\n              </span>\r\n            </div>\r\n            <div class=\"modal-footer\">\r\n                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteGisData()\"\r\n                >确定\r\n                </button>\r\n                <button type=\"button\" class=\"btn btn-default\"\r\n                        data-dismiss=\"modal\">取消\r\n                </button>\r\n            </div>\r\n        </div><!-- /.modal-content -->\r\n    </div><!-- /.modal -->\r\n</div>\r\n";
-
-/***/ },
-/* 20 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"row\" >\r\n    <div class=\"content\">\r\n        个人信息\r\n    </div>\r\n</div>";
 
 /***/ },
 /* 21 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"row\">\r\n    <div class=\"content\">\r\n        <form action=\"interface/upload.php\" method=\"post\" enctype=\"multipart/form-data\">\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传GeoJSON</label><br>\r\n                <my-select-btn filetype=\"geo\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.json文件</span>\r\n                    <input name='geo' id=\"geo\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传Shapefile</label><br>\r\n                <my-select-btn filetype=\"shp\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.shp文件</span>\r\n                    <input name='shp' id=\"shp\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n                <br>\r\n                <my-select-btn filetype=\"dbf\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.dbf文件</span>\r\n                    <input name='dbf' id=\"dbf\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n\r\n            <button class=\"btn btn-success btn-block\" type=\"submit\">\r\n              <span class=\"glyphicon glyphicon-open\">\r\n              </span><span>&nbsp;&nbsp;上传</span>\r\n            </button>\r\n        </form>\r\n    </div>\r\n</div>";
+	module.exports = "<div class=\"row\">\r\n    <div class='content'>\r\n        <table class=\"table table-bordered\">\r\n            <caption>\r\n                <h3 class='text-center'>GIS数据</h3>\r\n            </caption>\r\n            <thead>\r\n            <tr>\r\n                <td>名称</td>\r\n                <td>类型</td>\r\n                <td>大小</td>\r\n                <td>上传时间</td>\r\n                <td>操作</td>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            <tr  ng-repeat=\"item in gisdata\">\r\n                <td data-gis={{item.id}}>{{item.gis_name}}</td>\r\n                <td>{{item.gis_type}}</td>\r\n                <td>{{(item.gis_size/1024).toFixed(2)}}&nbsp;KB</td>\r\n                <td>{{item.upload_time}}</td>\r\n                <td>\r\n                    <button class=\"btn btn-info detail-info\" title='查看'>\r\n                        <a href='#gisDetail/{{item.id}}'style='display:block'>\r\n                            <i class='icon-zoom-in'></i>\r\n                        </a>\r\n                    </button>\r\n                    <my-confirm-del id={{item.id}} info=\"$parent.alertInfo\" curid=\"$parent.gisID\">\r\n                    </my-confirm-del>\r\n                </td>\r\n            </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n\r\n<!--Modal-->\r\n<div class=\"modal fade\" id=\"confirmModal\" tabindex=\"-1\" role=\"dialog\"\r\n     aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-header\">\r\n                <button type=\"button\" class=\"close\"\r\n                        data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                    &times;\r\n                </button>\r\n                <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                    提示\r\n                </h4>\r\n            </div>\r\n            <div class=\"modal-body\">\r\n              <span  ng-bind=\"alertInfo\">\r\n              </span>\r\n            </div>\r\n            <div class=\"modal-footer\">\r\n                <button type=\"button\" class=\"btn btn-primary\" ng-click=\"deleteGisData()\"\r\n                >确定\r\n                </button>\r\n                <button type=\"button\" class=\"btn btn-default\"\r\n                        data-dismiss=\"modal\">取消\r\n                </button>\r\n            </div>\r\n        </div><!-- /.modal-content -->\r\n    </div><!-- /.modal -->\r\n</div>\r\n";
 
 /***/ },
 /* 22 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\" >\r\n    <div class=\"content\">\r\n        个人信息\r\n        <button ng-click=\"logout()\">退出登录</button>\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"content\">\r\n        <form action=\"interface/upload.php\" method=\"post\" enctype=\"multipart/form-data\">\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传GeoJSON</label><br>\r\n                <my-select-btn filetype=\"geo\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.json文件</span>\r\n                    <input name='geo' id=\"geo\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n            <div class=\"form-group col-sm-6\">\r\n                <label>上传Shapefile</label><br>\r\n                <my-select-btn filetype=\"shp\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.shp文件</span>\r\n                    <input name='shp' id=\"shp\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n                <br>\r\n                <my-select-btn filetype=\"dbf\">\r\n                    <span class='glyphicon glyphicon-folder-open'></span> <span>&nbsp;&nbsp;.dbf文件</span>\r\n                    <input name='dbf' id=\"dbf\" type='file' style='display:none' class='openfile'/>\r\n                </my-select-btn>\r\n            </div>\r\n            <input type=\"text\" style=\"display: none\"  name=\"user_id\" ng-model=\"user_id\">\r\n            <input type=\"text\" style=\"display: none\"  name=\"user_name\" ng-model=\"user_name\">\r\n            <button class=\"btn btn-success btn-block\" type=\"submit\">\r\n              <span class=\"glyphicon glyphicon-open\">\r\n              </span><span>&nbsp;&nbsp;上传</span>\r\n            </button>\r\n        </form>\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"content col-sm-4 col-sm-offset-4\">\r\n        <form action=\"#\" name=\"loginForm\" >\r\n            <div class=\"form-group \">\r\n                <label><i class='icon-user'></i></label>\r\n                <input\r\n                        type=\"text\"\r\n                        name='login_user_acount'\r\n                        ng-model=\"login_user_acount\"\r\n                        placeholder=\"账号\"\r\n                />\r\n            </div>\r\n            <div class=\"form-group \">\r\n                <label><i class='icon-lock'></i></label>\r\n                <input type=\"password\" ng-model=\"login_user_pwd\" placeholder=\"密码\"/>\r\n            </div>\r\n            <button class=\"btn  btn-success\" type=\"button\" ng-click=\"login()\">\r\n              <i class=\"icon-circle-arrow-right\"></i>\r\n            </button>\r\n        </form>\r\n        <a href=\"#user/register\">注册</a>\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"row\">\r\n    <div class=\"content col-sm-4 col-sm-offset-4\">\r\n        <form action=\"#\" >\r\n            <div class=\"form-group \">\r\n                <label class=\"col-sm-3 control-label\">邮箱</label>\r\n                <input type=\"text\" ng-model=\"reg_user_acount\" />\r\n            </div>\r\n            <div class=\"form-group \">\r\n                <label class=\"col-sm-3 control-label\">用户名</label>\r\n                <input type=\"text\" ng-model=\"reg_user_name\"/>\r\n            </div>\r\n            <div class=\"form-group \">\r\n                <label class=\"col-sm-3 control-label\">密码</label>\r\n                <input type=\"password\" ng-model=\"reg_user_pwd\"/>\r\n            </div>\r\n            <div class=\"form-group \">\r\n                <label class=\"col-sm-3 control-label\">确认密码</label>\r\n                <input type=\"password\" ng-model=\"reg_user_pwd_r\"/>\r\n            </div>\r\n            <button class=\"btn btn-block btn-success\" type=\"button\" ng-click=\"regist()\">\r\n                <i class=\"icon-circle-arrow-right\"></i>\r\n            </button>\r\n        </form>\r\n        <a href=\"#user/login\">已有账号，去登录</a>\r\n    </div>\r\n</div>";
+
+/***/ },
+/* 26 */
 /***/ function(module, exports) {
 
 	module.exports = "<div class=\"row\">\r\n    <div class=\"map-area col-sm-7\">\r\n        <div id=\"map\">\r\n            <div class=\"ol-popup\" ng-show=\"Flag.isOverMap\">\r\n                <p id='title' class='tc'>特征属性</p>\r\n                <div class=\"popup-content\">\r\n                    <table class='f12'>\r\n                        <tr ng-repeat=\"(x,y) in featureProps\">\r\n                            <th class='tr'>\r\n                                <span ng-bind='x'></span>：\r\n                            </th>\r\n                            <td>\r\n                                <span >{{y}}</span>\r\n                            </td>\r\n                        </tr>\r\n                    </table>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- popupOverlayer -->\r\n\r\n    <div class=\"col-sm-5\" id=\"sider-bar\" >\r\n        <div class=\"row\" >\r\n            <div class=\"col-sm-9\" style=\"height:520px;overflow: hidden;overflow-y: auto\" >\r\n                <div class=\"panel panel-body\">\r\n                    <table class=\"table\">\r\n                        <caption class='tc'>\r\n                            <span class='f18 c666'>gis数据记录信息</span>&nbsp;&nbsp;\r\n                  <span\r\n                          style='cursor:pointer;color:#51A6E8'\r\n                          ng-class=\"{true:'icon-chevron-up',false:'icon-chevron-down'}[Flag.isShowRecord]\"\r\n                          ng-click='Flag.isShowRecord = !Flag.isShowRecord'></span>\r\n                        </caption>\r\n                        <tbody ng-show='Flag.isShowRecord'>\r\n                        <tr ng-repeat=\"(x,y) in record\">\r\n                            <th ng-bind='recordMap[x]'></th>\r\n                            <td ng-bind='y'></td>\r\n                        </tr>\r\n                        </tbody>\r\n                    </table>\r\n                </div>\r\n                <div class='panel panel-body' ng-show='Flag.isEditingVector' ng-cloak>\r\n                    当前选中特征属性：\r\n                    <p ng-show='!Flag.hasSelected'>当前未选中特征</p>\r\n                    <div ng-show='Flag.hasSelected'>\r\n                        <table class='table'>\r\n                            <tr class='f14'>\r\n                                <th style=\"width: 25%\">属性</th>\r\n                                <td style=\"width: 47%\">值</td>\r\n                                <td style=\"width: 28%\">操作</td>\r\n                            </tr>\r\n                            <tr ng-repeat=\"(x,y) in featureProps\">\r\n                                <th>\r\n                                    <span ng-bind='x' ></span>\r\n                                </th>\r\n                                <td>\r\n                                    <span >{{y}}</span>\r\n                                </td>\r\n                                <td class='edit-group'>\r\n                                <my-edit-props-group key={{x}} val={{y}} alertinfo=\"$parent.alertInfo\" >\r\n                                </my-edit-props-group >\r\n                                    <!-- <span href=\"\" ng-class=\"{true:'icon-edit edit-item disabled',false:'icon-edit edit-item'}[Flag.isEditingProp]\" ng-click=\"editProp('edit', x, y)\"></span>\r\n                                    <span href=\"\" class=\"icon-trash delete edit-item\" ng-click=\"editProp('showConfirmModal', x, y)\" ></span> -->\r\n                                </td>\r\n                            </tr>\r\n                        </table>\r\n                        <hr>\r\n                        <!-- 正在编辑属性 -->\r\n                        <div ng-show='Flag.isEditingProp'>\r\n                            <div class=\"row\">\r\n                                <div class=\"col-sm-6\">\r\n                                    属性：<input type=\"text\" placeholder='属性值' ng-model='currentProps.k' ng-readonly='!Flag.isAddingProp'>\r\n                                    <my-edit-props class='icon-ok edit-btn' type='ok' update-props=\"updateProps()\"></my-edit-props>\r\n                                </div>\r\n                                <div class=\"col-sm-6\">\r\n                                    值：<input type=\"text\" placeholder='属性值' ng-model='currentProps.v'>\r\n                                    <my-edit-props class='icon-remove edit-btn' type='cancle'></my-edit-props>\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                        <div ng-show='!Flag.isAddingProp && !Flag.isEditingProp'>\r\n<!--                             <button\r\n        ng-click='editProp(\"add\")'>\r\n    <span class=\"icon-plus\"></span>\r\n</button> -->\r\n                            <my-edit-feature \r\n                                    title='添加属性'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='addProp'\r\n                                    >\r\n                                    <span class='icon-plus'></span>\r\n                            </my-edit-feature>\r\n                            <my-edit-feature \r\n                                    title='保存修改'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='saveFeature'\r\n                                    method=\"saveFeature()\"\r\n                                    >\r\n                                    <span class='icon-save'></span>\r\n                            </my-edit-feature>\r\n                            <my-edit-feature \r\n                                    title='删除特征'\r\n                                    class=\"btn btn-default\"\r\n                                    style='color:#AFAFAF'\r\n                                    type='deleteFeature'\r\n                                    method=\"deleteFeature()\"\r\n                                    >\r\n                                    <span class='icon-trash'></span>\r\n                            </my-edit-feature>\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"col-sm-3 \">\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"toggleTilelayer()\"\r\n                    >\r\n                        <span ng-show='!Flag.isOpenTile'>开启</span>\r\n                        <span ng-show='Flag.isOpenTile'>关闭</span>\r\n                        Tile层</button>\r\n                </p>\r\n                <hr>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"editGis()\"\r\n                            ng-show='!Flag.isEditingVector'\r\n                    >编辑特征</button>\r\n                </p>\r\n                <p>\r\n                    <button\r\n                            class=\"btn btn-block btn-default\"\r\n                            ng-click=\"cancleEdit()\"\r\n                            ng-show='Flag.isEditingVector'\r\n                    >退出编辑</button>\r\n                </p>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <!-- 模态框 -->\r\n    <div class=\"modal fade\" id=\"removePropModal\" tabindex=\"-1\" role=\"dialog\"\r\n         aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">\r\n        <div class=\"modal-dialog\">\r\n            <div class=\"modal-content\">\r\n                <div class=\"modal-header\">\r\n                    <button type=\"button\" class=\"close\"\r\n                            data-dismiss=\"modal\" aria-hidden=\"true\">\r\n                        &times;\r\n                    </button>\r\n                    <h4 class=\"modal-title\" id=\"myModalLabel\">\r\n                        提示\r\n                    </h4>\r\n                </div>\r\n                <div class=\"modal-body\" ng-bind=\"alertInfo\">\r\n                </div>\r\n                <div class=\"modal-footer\">\r\n                    <button type=\"button\" class=\"btn btn-primary\" ng-click=\"confirmSubmit()\"\r\n                    >确定\r\n                    </button>\r\n                    <button type=\"button\" class=\"btn btn-default\"\r\n                            data-dismiss=\"modal\">取消\r\n                    </button>\r\n                </div>\r\n            </div><!-- /.modal-content -->\r\n        </div><!-- /.modal -->\r\n    </div>\r\n</div>";

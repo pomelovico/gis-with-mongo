@@ -3,8 +3,10 @@
  */
 import gisData from './gisData';
 import mapService from './mapService';
+import userService from './userService';
 
 export const services = {
     gisData,
-    mapService
+    mapService,
+    userService
 };
