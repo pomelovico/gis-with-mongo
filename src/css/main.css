@@ -31,15 +31,15 @@
       }
       ._menu{
         display: inline-block;
-        vertical-align: middle;
+        /*vertical-align: middle;*/
       }
-      ._menu:before{
+/*      ._menu:before{
         content:'';
         display: inline-block;
-        width: 0px;
+        width: 0;
         height: 100%;
         vertical-align: middle;
-      }
+      }*/
       .map-area{
         background-color: #fff;
         border:15px solid #D6DCE2;
