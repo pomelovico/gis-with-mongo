@@ -44,6 +44,8 @@
         background-color: #fff;
         border:15px solid #D6DCE2;
         box-sizing:border-box;
+        padding-left: 0;
+        padding-right: 0;
       }
       #map{
         height: 520px;
